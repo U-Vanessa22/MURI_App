@@ -1,0 +1,212 @@
+import axios from 'axios';
+
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
+const api = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Add token to requests if it exists
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Handle token refresh or logout on 401
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      // Try to refresh token or redirect to login
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
+export const authAPI = {
+  // Register user
+  register: async (userData) => {
+    const response = await api.post('/auth/register', userData);
+    if (response.data.access_token) {
+      localStorage.setItem('access_token', response.data.access_token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+    }
+    return response.data;
+  },
+
+  // Login user
+  login: async (credentials) => {
+    const response = await api.post('/auth/login', credentials);
+    if (response.data.access_token) {
+      localStorage.setItem('access_token', response.data.access_token);
+      localStorage.setItem('user', JSON.stringify(response.data.user || response.data));
+    }
+    return response.data;
+  },
+
+  // Get current user
+  getCurrentUser: async () => {
+    const response = await api.get('/auth/me');
+    return response.data;
+  },
+
+  // Logout
+  logout: () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('refresh_token');
+  },
+};
+
+export const voucherAPI = {
+  create: async (payload) => {
+    const response = await api.post('/vouchers/', payload);
+    return response.data;
+  },
+
+  list: async (params = {}) => {
+    const response = await api.get('/vouchers/', { params });
+    return response.data;
+  },
+
+  update: async (voucherId, payload) => {
+    const response = await api.patch(`/vouchers/${voucherId}`, payload);
+    return response.data;
+  },
+};
+
+export const reportAPI = {
+  getOverview: async () => {
+    const response = await api.get('/reports/overview');
+    return response.data;
+  },
+
+  getSlaConfig: async () => {
+    const response = await api.get('/reports/sla-config');
+    return response.data;
+  },
+
+  updateSlaConfig: async (payload) => {
+    const response = await api.put('/reports/sla-config', payload);
+    return response.data;
+  },
+
+  checkSla: async () => {
+    const response = await api.post('/reports/check-sla');
+    return response.data;
+  },
+
+  getNotifications: async (params = {}) => {
+    const response = await api.get('/reports/notifications', { params });
+    return response.data;
+  },
+
+  markNotificationRead: async (notificationId) => {
+    const response = await api.patch(`/reports/notifications/${notificationId}/read`);
+    return response.data;
+  },
+
+  markAllNotificationsRead: async ({ voucherId = null, targetEmail = null } = {}) => {
+    const response = await api.post('/reports/notifications/read-all', {
+      voucher_id: voucherId,
+      target_email: targetEmail,
+    });
+    return response.data;
+  },
+};
+
+export const usersAPI = {
+  createUser: async (payload) => {
+    const response = await api.post('/users/create-user', payload);
+    return response.data;
+  },
+
+  listUsers: async () => {
+    const response = await api.get('/users/');
+    return response.data;
+  },
+
+  resetUserPassword: async (userId, newPassword) => {
+    const response = await api.patch(`/users/${userId}/reset-password`, { new_password: newPassword });
+    return response.data;
+  },
+
+  updateUserStatus: async (userId, isActive) => {
+    const response = await api.patch(`/users/${userId}/status`, { is_active: isActive });
+    return response.data;
+  },
+
+  listITPersonnel: async () => {
+    const response = await api.get('/users/it-personnel');
+    return response.data;
+  },
+};
+
+export const documentAPI = {
+  create: async (payload) => {
+    const response = await api.post('/documents/', payload);
+    return response.data;
+  },
+
+  list: async () => {
+    const response = await api.get('/documents/');
+    return response.data;
+  },
+
+  linkToVoucher: async (documentId, voucherId) => {
+    const response = await api.patch(`/documents/${documentId}/link`, { voucher_id: voucherId });
+    return response.data;
+  },
+
+  approve: async (documentId, payload) => {
+    const response = await api.patch(`/documents/${documentId}/approve`, payload);
+    return response.data;
+  },
+
+  sign: async (documentId, payload) => {
+    const response = await api.patch(`/documents/${documentId}/sign`, payload);
+    return response.data;
+  },
+};
+
+export const disposalAPI = {
+  create: async (payload) => {
+    const response = await api.post('/disposal/', payload);
+    return response.data;
+  },
+
+  list: async () => {
+    const response = await api.get('/disposal/');
+    return response.data;
+  },
+};
+
+export const chatbotAPI = {
+  ask: async (message, options = {}) => {
+    const response = await api.post('/chatbot/ask', { message }, {
+      timeout: options.timeoutMs || 25000,
+    });
+    return response.data;
+  },
+};
+
+export default api;
