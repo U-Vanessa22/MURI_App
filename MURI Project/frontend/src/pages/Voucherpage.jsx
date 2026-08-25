@@ -7,13 +7,14 @@ import { documentAPI, voucherAPI } from '../services/api';
 import { useThemeMode } from '../contexts/ThemeContext';
 
 const DRAFT_STORAGE_KEY = 'muri_voucher_draft';
-const STATUS_LABELS = {
-  draft: 'Draft',
-  open: 'Pending',
-  assigned: 'Pending / Under Review',
-  in_progress: 'Under Review',
-  resolved: 'Completed',
-  closed: 'Archived',
+// Labels and colors match the 5 real backend statuses and the locked Style Guide
+// (Open/Assigned/In Progress/Resolved/Closed) — do not relabel these.
+const STATUS_META = {
+  open: { label: 'Open', background: '#EDEDE7', color: '#1A1A1A' },
+  assigned: { label: 'Assigned', background: '#8FA6B8', color: '#1A1A1A' },
+  in_progress: { label: 'In Progress', background: '#D9A05B', color: '#1A1A1A' },
+  resolved: { label: 'Resolved', background: '#6E8F5C', color: '#FFFFFF' },
+  closed: { label: 'Closed', background: '#1E2A3A', color: '#FFFFFF' },
 };
 
 const VoucherPage = () => {
@@ -34,11 +35,17 @@ const VoucherPage = () => {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('success');
+  const showMessage = useCallback((text, type = 'success') => {
+    setMessage(text);
+    setMessageType(type);
+  }, []);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const fileInputRef = React.useRef(null);
   const location = useLocation();
   const [notesState, setNotesState] = useState({});
   const [documentLinkState, setDocumentLinkState] = useState({});
+  const [updatingTicketIds, setUpdatingTicketIds] = useState(new Set());
   const { darkMode, toggleDarkMode } = useThemeMode();
 
   const currentUser = useMemo(() => {
@@ -81,7 +88,10 @@ const VoucherPage = () => {
   const canCreateVoucher = isUserRole;
   const currentUserId = Number(currentUser?.id || 0);
 
-  const getStatusLabel = useCallback((status) => STATUS_LABELS[status] || 'Pending', []);
+  const getStatusMeta = useCallback(
+    (status) => STATUS_META[status] || { label: status || 'Unknown', background: '#EDEDE7', color: '#1A1A1A' },
+    []
+  );
 
   const buildDraftPayload = useCallback(() => ({
     ...formData,
@@ -147,11 +157,11 @@ const VoucherPage = () => {
       setNotesState(nextNotesState);
       setDocumentLinkState(nextDocumentLinkState);
     } catch (error) {
-      setMessage(error?.response?.data?.detail || 'Failed to load vouchers');
+      showMessage(error?.response?.data?.detail || 'Failed to load tickets', 'error');
     } finally {
       setLoading(false);
     }
-  }, [currentUserId, isUserRole, showOnlyMyTickets]);
+  }, [currentUserId, isUserRole, showOnlyMyTickets, showMessage]);
 
   useEffect(() => {
     if (!canCreateVoucher && activeTab === 'create') {
@@ -178,7 +188,7 @@ const VoucherPage = () => {
     });
 
     if (validFiles.length !== fileArray.length) {
-      setMessage('Some files were skipped (must be PNG, JPG, or PDF, max 10MB each)');
+      showMessage('Some files were skipped (must be PNG, JPG, or PDF, max 10MB each)', 'error');
     }
 
     setUploadedFiles(prev => [...prev, ...validFiles]);
@@ -212,7 +222,7 @@ const VoucherPage = () => {
     setMessage('');
 
     if (!currentUser?.email) {
-      setMessage('Please login again to submit voucher.');
+      showMessage('Please login again to submit ticket.', 'error');
       return;
     }
 
@@ -244,23 +254,30 @@ const VoucherPage = () => {
       });
       setUploadedFiles([]);
       localStorage.removeItem(DRAFT_STORAGE_KEY);
-      setMessage('Voucher submitted successfully.');
+      showMessage('Ticket submitted successfully.', 'success');
       await loadTickets();
       setActiveTab('list');
     } catch (error) {
-      setMessage(error?.response?.data?.detail || 'Failed to submit voucher');
+      showMessage(error?.response?.data?.detail || 'Failed to submit ticket', 'error');
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleStatusChange = async (ticketId, nextStatus) => {
+    setUpdatingTicketIds((prev) => new Set(prev).add(ticketId));
     try {
       await voucherAPI.update(ticketId, { status: nextStatus });
-      setMessage('Ticket status updated.');
+      showMessage('Ticket status updated.', 'success');
       await loadTickets();
     } catch (error) {
-      setMessage(error?.response?.data?.detail || 'Failed to update ticket status');
+      showMessage(error?.response?.data?.detail || 'Failed to update ticket status', 'error');
+    } finally {
+      setUpdatingTicketIds((prev) => {
+        const next = new Set(prev);
+        next.delete(ticketId);
+        return next;
+      });
     }
   };
 
@@ -271,10 +288,10 @@ const VoucherPage = () => {
         diagnosis: payload.diagnosis || null,
         action_taken: payload.action_taken || null,
       });
-      setMessage('Diagnosis and action saved.');
+      showMessage('Diagnosis and action saved.', 'success');
       await loadTickets();
     } catch (error) {
-      setMessage(error?.response?.data?.detail || 'Failed to save diagnosis/action');
+      showMessage(error?.response?.data?.detail || 'Failed to save diagnosis/action', 'error');
     }
   };
 
@@ -282,15 +299,15 @@ const VoucherPage = () => {
     try {
       const selectedDocumentId = documentLinkState[ticketId] ? Number(documentLinkState[ticketId]) : null;
       if (!selectedDocumentId) {
-        setMessage('Select a document to link.');
+        showMessage('Select a document to link.', 'error');
         return;
       }
 
       await documentAPI.linkToVoucher(selectedDocumentId, ticketId);
-      setMessage('Document linked to ticket successfully.');
+      showMessage('Document linked to ticket successfully.', 'success');
       await loadTickets();
     } catch (error) {
-      setMessage(error?.response?.data?.detail || 'Failed to link document');
+      showMessage(error?.response?.data?.detail || 'Failed to link document', 'error');
     }
   };
 
@@ -310,7 +327,7 @@ const VoucherPage = () => {
 
   const handleSaveDraft = () => {
     localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(buildDraftPayload()));
-    setMessage('Draft saved locally.');
+    showMessage('Draft saved locally.', 'success');
   };
 
   return (
@@ -321,7 +338,7 @@ const VoucherPage = () => {
       <main className="voucher-main">
         <header className="voucher-header">
           <div>
-            <h1>Voucher</h1>
+            <h1>Ticket</h1>
             <p>Submit support requests, save drafts, and track progress in real time</p>
           </div>
           <div className="voucher-header-right">
@@ -354,7 +371,11 @@ const VoucherPage = () => {
           </button>
         </div>
 
-        {message && <div className="voucher-message">{message}</div>}
+        {message && (
+          <div className={`voucher-message voucher-message-${messageType}`} role={messageType === 'error' ? 'alert' : 'status'}>
+            {message}
+          </div>
+        )}
 
         {canCreateVoucher && activeTab === 'create' && <div className="voucher-form-container">
           <h2>Submit New Request</h2>
@@ -549,13 +570,13 @@ const VoucherPage = () => {
 
         {activeTab === 'list' && (
           <div className="voucher-form-container">
-            <h2>Submitted Vouchers</h2>
+            <h2>Submitted Tickets</h2>
             <p>Monitor and update ticket progress</p>
 
-            {loading && <p>Loading vouchers...</p>}
+            {loading && <p>Loading tickets...</p>}
 
             {!loading && displayedTickets.length === 0 && (
-              <p>{(showOnlyMyTickets || isITRole) ? 'No pending tickets found.' : 'No vouchers found.'}</p>
+              <p>{(showOnlyMyTickets || isITRole) ? 'No pending tickets found.' : 'No tickets found.'}</p>
             )}
 
             {!loading && hasTicketFilter && displayedTickets.length === 0 && (
@@ -568,7 +589,18 @@ const VoucherPage = () => {
                   <div key={ticket.id} className={`voucher-ticket-card ${hasTicketFilter ? 'voucher-ticket-card-focus' : ''}`}>
                     <h4>{ticket.ticket_number} • {ticket.title}</h4>
                     <p>{ticket.description}</p>
-                    <p>Priority: <strong>{ticket.priority}</strong> | Status: <strong>{getStatusLabel(ticket.status)}</strong></p>
+                    <p>
+                      Priority: <strong>{ticket.priority}</strong> | Status:{' '}
+                      <span
+                        className="voucher-status-badge"
+                        style={{
+                          background: getStatusMeta(ticket.status).background,
+                          color: getStatusMeta(ticket.status).color,
+                        }}
+                      >
+                        {getStatusMeta(ticket.status).label}
+                      </span>
+                    </p>
                     <p><strong>Raised by:</strong> {ticket.requester_name || ticket.requester_email || 'Unknown staff member'}</p>
                     <p><strong>Station:</strong> {ticket.requester_station || 'Not provided'}</p>
                     <p><strong>Severity:</strong> {ticket.severity || ticket.priority || 'medium'}</p>
@@ -581,15 +613,21 @@ const VoucherPage = () => {
 
                     {canManageTickets && (
                       <div className="voucher-ticket-actions-row">
-                        <button className="voucher-ticket-action" type="button" onClick={() => handleStatusChange(ticket.id, 'in_progress')}>
-                          Mark Under Review
-                        </button>
-                        <button className="voucher-ticket-action" type="button" onClick={() => handleStatusChange(ticket.id, 'resolved')}>
-                          Mark Completed
-                        </button>
-                        <button className="voucher-ticket-action voucher-ticket-action-danger" type="button" onClick={() => handleStatusChange(ticket.id, 'closed')}>
-                          Archive
-                        </button>
+                        {updatingTicketIds.has(ticket.id) ? (
+                          <span className="voucher-ticket-updating">Updating status…</span>
+                        ) : (
+                          <>
+                            <button className="voucher-ticket-action" type="button" onClick={() => handleStatusChange(ticket.id, 'in_progress')}>
+                              Mark Under Review
+                            </button>
+                            <button className="voucher-ticket-action" type="button" onClick={() => handleStatusChange(ticket.id, 'resolved')}>
+                              Mark Completed
+                            </button>
+                            <button className="voucher-ticket-action voucher-ticket-action-danger" type="button" onClick={() => handleStatusChange(ticket.id, 'closed')}>
+                              Archive
+                            </button>
+                          </>
+                        )}
                       </div>
                     )}
 

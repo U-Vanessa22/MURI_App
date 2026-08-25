@@ -14,7 +14,7 @@ def run_startup_migrations(engine) -> None:
         "full_name": "ALTER TABLE users ADD COLUMN full_name VARCHAR",
         "department": "ALTER TABLE users ADD COLUMN department VARCHAR",
         "station": "ALTER TABLE users ADD COLUMN station VARCHAR",
-        "updated_at": "ALTER TABLE users ADD COLUMN updated_at DATETIME",
+        "updated_at": "ALTER TABLE users ADD COLUMN updated_at TIMESTAMP",
     }
 
     document_columns = set()
@@ -28,12 +28,12 @@ def run_startup_migrations(engine) -> None:
         "acquisition_details": "ALTER TABLE documents ADD COLUMN acquisition_details VARCHAR",
         "receiving_comment": "ALTER TABLE documents ADD COLUMN receiving_comment TEXT",
         "user_signature": "ALTER TABLE documents ADD COLUMN user_signature VARCHAR",
-        "user_signed_at": "ALTER TABLE documents ADD COLUMN user_signed_at DATETIME",
+        "user_signed_at": "ALTER TABLE documents ADD COLUMN user_signed_at TIMESTAMP",
         "signature_status": "ALTER TABLE documents ADD COLUMN signature_status VARCHAR DEFAULT 'not_required'",
         "asset_status": "ALTER TABLE documents ADD COLUMN asset_status VARCHAR DEFAULT 'active'",
         "approval_status": "ALTER TABLE documents ADD COLUMN approval_status VARCHAR DEFAULT 'pending'",
         "approved_by_id": "ALTER TABLE documents ADD COLUMN approved_by_id INTEGER",
-        "approved_at": "ALTER TABLE documents ADD COLUMN approved_at DATETIME",
+        "approved_at": "ALTER TABLE documents ADD COLUMN approved_at TIMESTAMP",
         "approval_note": "ALTER TABLE documents ADD COLUMN approval_note TEXT",
         "disposal_id": "ALTER TABLE documents ADD COLUMN disposal_id INTEGER",
     }

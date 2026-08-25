@@ -27,6 +27,9 @@ import sys
 from sqlalchemy import create_engine, MetaData, Table, select, text
 from sqlalchemy.orm import sessionmaker
 from app.db.session import Base
+# Importing the model modules registers their tables on Base.metadata.
+# Without this, Base.metadata is empty and create_all() creates nothing.
+from app.models import user, voucher, document, disposal, sla_config, notification
 
 ORDERED_TABLES = [
     "users",
@@ -82,7 +85,10 @@ def main():
 
     summary = {}
 
-    with source_engine.connect() as s_conn, target_engine.connect() as t_conn:
+    # target_engine.begin() commits automatically on a clean exit (and rolls
+    # back on error) — a plain .connect() does neither, which silently
+    # discarded every inserted row on close.
+    with source_engine.connect() as s_conn, target_engine.begin() as t_conn:
         for table_name in ORDERED_TABLES:
             if table_name not in source_meta.tables:
                 print(f"Skipping missing source table: {table_name}")

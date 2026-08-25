@@ -31,7 +31,9 @@ const ITDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
   const [stats, setStats] = useState({
-    totalAssets: 12,
+    // Real device/asset inventory isn't built yet (Bundle B) — no backend
+    // data exists to show here.
+    totalAssets: 0,
     activeTickets: 0,
     resolved: 0,
     pending: 0,
@@ -455,7 +457,7 @@ const ITDashboard = () => {
               onClick={() => { setActiveNav('tickets'); navigate('/voucher'); }}
             >
               <FaTicketAlt />
-              <span className="simple-nav-label">Voucher</span>
+              <span className="simple-nav-label">Ticket</span>
             </li>
 
             <li
@@ -670,15 +672,15 @@ const ITDashboard = () => {
             <div className="simple-stats-grid" style={{ marginTop: '12px' }}>
               <div className="simple-stat-card">
                 <div className="simple-stat-value">{queueSnapshot.open}</div>
-                <div className="simple-stat-label">Pending Queue</div>
+                <div className="simple-stat-label">Open Queue</div>
               </div>
               <div className="simple-stat-card">
                 <div className="simple-stat-value">{queueSnapshot.assigned}</div>
-                <div className="simple-stat-label">Under Review Queue</div>
+                <div className="simple-stat-label">Assigned Queue</div>
               </div>
               <div className="simple-stat-card">
                 <div className="simple-stat-value">{queueSnapshot.in_progress}</div>
-                <div className="simple-stat-label">Working Queue</div>
+                <div className="simple-stat-label">In Progress Queue</div>
               </div>
             </div>
           </section>

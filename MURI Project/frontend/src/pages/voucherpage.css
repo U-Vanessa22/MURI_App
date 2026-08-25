@@ -448,8 +448,21 @@
 
 .voucher-message {
   margin-bottom: 12px;
-  color: #0f766e;
+  padding: 8px 12px;
+  border-radius: 8px;
   font-weight: 500;
+}
+
+.voucher-message-success {
+  color: #0f766e;
+  background: rgba(15, 118, 110, 0.08);
+  border: 1px solid rgba(15, 118, 110, 0.25);
+}
+
+.voucher-message-error {
+  color: #b91c1c;
+  background: rgba(185, 28, 28, 0.08);
+  border: 1px solid rgba(185, 28, 28, 0.3);
 }
 
 .voucher-ticket-grid {
@@ -499,10 +512,8 @@
   text-transform: uppercase;
 }
 
-.voucher-status-badge {
-  background: rgba(47, 166, 180, 0.12);
-  color: #1E4D57;
-}
+/* Status colors are set inline per-status (see STATUS_META in Voucherpage.jsx)
+   to match the locked Style Guide; no default background/color here. */
 
 .ticket-priority-badge {
   background: rgba(30, 77, 87, 0.1);
@@ -571,6 +582,31 @@
   border-color: rgba(30, 77, 87, 0.2);
   background: rgba(30, 77, 87, 0.08);
   color: #143b43;
+}
+
+.voucher-ticket-updating {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #1E4D57;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.voucher-ticket-updating::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(30, 77, 87, 0.25);
+  border-top-color: #1E4D57;
+  border-radius: 50%;
+  animation: voucher-spin 0.7s linear infinite;
+}
+
+@keyframes voucher-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .voucher-ticket-action-danger:hover {

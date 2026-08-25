@@ -38,7 +38,7 @@ const UnifiedSidebar = ({ activePath }) => {
 
   const userItems = [
     { name: 'Dashboard', icon: FaHome, path: dashboardPath },
-    { name: 'Voucher', icon: FaTicketAlt, path: '/voucher' },
+    { name: 'Ticket', icon: FaTicketAlt, path: '/voucher' },
     { name: 'Chatbot', icon: FaRobot, path: '/chatbot' },
     { name: 'Document', icon: FaFileContract, path: '/document' },
     { name: 'Reports', icon: FaChartBar, path: '/report' },
@@ -47,7 +47,7 @@ const UnifiedSidebar = ({ activePath }) => {
 
   const itItems = [
     { name: 'Dashboard', icon: FaHome, path: dashboardPath },
-    { name: 'Voucher', icon: FaTicketAlt, path: '/voucher' },
+    { name: 'Ticket', icon: FaTicketAlt, path: '/voucher' },
     { name: 'Chatbot', icon: FaRobot, path: '/chatbot' },
     { name: 'Disposal', icon: FaHeadset, path: '/disposal' },
     { name: 'Report', icon: FaChartBar, path: '/report' },

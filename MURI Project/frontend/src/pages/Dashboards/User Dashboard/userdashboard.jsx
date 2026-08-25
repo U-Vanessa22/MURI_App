@@ -6,15 +6,19 @@ import {
   FaRobot,
   FaUser,
   FaSignOutAlt,
-  FaTools,
   FaFile,
   FaChartBar,
 } from 'react-icons/fa';
 import { FiMenu } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
+import { formatDistanceToNow } from 'date-fns';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useThemeMode } from '../../../contexts/ThemeContext';
+import { voucherAPI } from '../../../services/api';
 import './userdashboard.css';
+
+const PENDING_STATUSES = ['open', 'assigned', 'in_progress'];
+const DONE_STATUSES = ['resolved', 'closed'];
 
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -25,6 +29,9 @@ const UserDashboard = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notifications] = useState([]);
+  const [myTickets, setMyTickets] = useState([]);
+  const [ticketsLoading, setTicketsLoading] = useState(true);
+  const [ticketsError, setTicketsError] = useState('');
 
   // Check authentication on component mount
   useEffect(() => {
@@ -44,45 +51,54 @@ const UserDashboard = () => {
     }
   }, [navigate]);
 
+  // Load this user's own tickets — the backend doesn't filter by requester,
+  // so we fetch everything and keep only tickets this user raised.
+  useEffect(() => {
+    if (!user?.id) return;
+
+    let cancelled = false;
+    setTicketsLoading(true);
+    setTicketsError('');
+
+    voucherAPI
+      .list()
+      .then((allTickets) => {
+        if (cancelled) return;
+        const ownTickets = (allTickets || []).filter((ticket) => ticket.requester_id === user.id);
+        setMyTickets(ownTickets);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setMyTickets([]);
+        setTicketsError('Could not load your tickets. Try refreshing the page.');
+      })
+      .finally(() => {
+        if (!cancelled) setTicketsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
+
   const stats = {
-    totalAssets: 12,
-    myTickets: 4,
-    resolved: 8,
-    pending: 2,
+    // Real device/asset inventory isn't built yet (Bundle B) — no backend
+    // data exists to show here.
+    totalAssets: 0,
+    myTickets: myTickets.length,
+    resolved: myTickets.filter((t) => DONE_STATUSES.includes(t.status)).length,
+    pending: myTickets.filter((t) => PENDING_STATUSES.includes(t.status)).length,
   };
 
-  const recentActivity = [
-    {
-      id: 1,
-      title: 'Laptop maintenance completed',
-      time: '2 hours ago',
-      icon: <FaTools />,
-    },
-    {
-      id: 2,
-      title: 'New software installation request',
-      time: '5 hours ago',
-      icon: <FaLaptop />,
-    },
-    {
-      id: 3,
-      title: 'Asset #RAB00123 warranty updated',
-      time: '1 day ago',
-      icon: <FaFile />,
-    },
-    {
-      id: 4,
-      title: 'Ticket #TKT001 opened',
-      time: '2 days ago',
+  const recentActivity = [...myTickets]
+    .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
+    .slice(0, 5)
+    .map((ticket) => ({
+      id: ticket.id,
+      title: `${ticket.ticket_number}: ${ticket.title}`,
+      time: formatDistanceToNow(new Date(ticket.updated_at), { addSuffix: true }),
       icon: <FaTicketAlt />,
-    },
-    {
-      id: 5,
-      title: 'Your profile updated',
-      time: '3 days ago',
-      icon: <FaUser />,
-    },
-  ];
+    }));
 
   const handleLogout = () => {
     logout();
@@ -204,7 +220,7 @@ const UserDashboard = () => {
               onClick={() => { setActiveNav('voucher'); navigate('/voucher'); }}
             >
               <FaTicketAlt />
-              <span className="simple-nav-label">Voucher</span>
+              <span className="simple-nav-label">Ticket</span>
             </li>
 
             <li
@@ -270,21 +286,24 @@ const UserDashboard = () => {
 
           {/* Stats Section */}
           <section className="simple-stats-section">
+            {ticketsError && (
+              <div style={{ marginBottom: '10px', color: '#b91c1c' }}>{ticketsError}</div>
+            )}
             <div className="simple-stats-grid">
               <div className="simple-stat-card">
                 <div className="simple-stat-value">{stats.totalAssets}</div>
                 <div className="simple-stat-label">My Assets</div>
               </div>
               <div className="simple-stat-card">
-                <div className="simple-stat-value">{stats.myTickets}</div>
+                <div className="simple-stat-value">{ticketsLoading ? '—' : stats.myTickets}</div>
                 <div className="simple-stat-label">My Tickets</div>
               </div>
               <div className="simple-stat-card">
-                <div className="simple-stat-value">{stats.resolved}</div>
+                <div className="simple-stat-value">{ticketsLoading ? '—' : stats.resolved}</div>
                 <div className="simple-stat-label">Resolved</div>
               </div>
               <div className="simple-stat-card">
-                <div className="simple-stat-value">{stats.pending}</div>
+                <div className="simple-stat-value">{ticketsLoading ? '—' : stats.pending}</div>
                 <div className="simple-stat-label">Pending</div>
               </div>
             </div>
@@ -360,7 +379,9 @@ const UserDashboard = () => {
           <section className="simple-activity-section">
             <h2 className="simple-section-title">Recent Activity</h2>
             <div className="simple-activity-list">
-              {recentActivity.map((item) => (
+              {ticketsLoading && <p>Loading activity…</p>}
+              {!ticketsLoading && recentActivity.length === 0 && <p>No recent ticket activity yet.</p>}
+              {!ticketsLoading && recentActivity.map((item) => (
                 <div key={item.id} className="simple-activity-item">
                   <div className="simple-activity-text">
                     <div className="simple-activity-icon">{item.icon}</div>
