@@ -1,0 +1,106 @@
+.muri-topnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  position: sticky;
+  top: 0;
+  z-index: 900;
+}
+
+.muri-topnav-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.muri-topnav-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.muri-topnav-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.muri-topnav-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.muri-topnav-icon-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.muri-topnav-icon-btn:hover {
+  background: #ecf0f1;
+}
+
+.muri-topnav-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.muri-topnav-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #0C5494;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.muri-topnav-user-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.muri-topnav-user-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.muri-topnav-user-role {
+  font-size: 11px;
+  color: #7f8c8d;
+}
+
+/* Dark mode */
+.dark .muri-topnav {
+  background: #1a252f;
+  border-bottom: 1px solid #34495e;
+}
+
+.dark .muri-topnav-title,
+.dark .muri-topnav-user-name {
+  color: #ecf0f1;
+}
+
+.dark .muri-topnav-icon-btn:hover {
+  background: #2c3e50;
+}
+
+@media (max-width: 600px) {
+  .muri-topnav-user-info {
+    display: none;
+  }
+}

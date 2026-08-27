@@ -3,23 +3,18 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from '
 const ThemeContext = createContext(undefined);
 
 export const ThemeModeProvider = ({ children }) => {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode] = useState(false);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('asm_dark_mode');
-    setDarkMode(savedTheme === 'true');
+    localStorage.removeItem('asm_dark_mode');
+    document.body.classList.remove('asm-dark');
   }, []);
-
-  useEffect(() => {
-    localStorage.setItem('asm_dark_mode', String(darkMode));
-    document.body.classList.toggle('asm-dark', darkMode);
-  }, [darkMode]);
 
   const value = useMemo(
     () => ({
       darkMode,
-      toggleDarkMode: () => setDarkMode((prev) => !prev),
-      setDarkMode,
+      toggleDarkMode: () => {},
+      setDarkMode: () => {},
     }),
     [darkMode]
   );

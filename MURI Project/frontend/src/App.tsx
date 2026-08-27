@@ -5,35 +5,35 @@ import { ThemeProvider, createTheme } from '@mui/material';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeModeProvider } from './contexts/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
-import LoginPage from './pages/Login/LoginPage';
-import './styles/global.css';
-import UserDashboard from './pages/Dashboards/User Dashboard/userdashboard';
-import VoucherPage from './pages/Voucherpage';
-import Chatbot from './pages/Chatbot';
-import Report from './pages/Report';
-import Settings from '../src/pages/Settings';
-import DataAssets from './pages/DataAssets';
-import Disposal from './pages/Disposal';
-import Document from './pages/Document';
-import ITDashboard from './pages/Dashboards/IT Dashboard/itdashboard';
-import AdminDashboard from './pages/Dashboards/Admin Dashboard/admindashboard';
-import AdminUsers from './pages/AdminUsers';
-import VirtualDashboard from './pages/Dashboards/Virtual Dashboard/virtualdashboard';
+import LoginPage from './screens/Login/LoginPage';
+import UserDashboard from './screens/Dashboards/User Dashboard/userdashboard';
+import VoucherPage from './screens/Voucherpage';
+import Chatbot from './screens/Chatbot';
+import Report from './screens/Report';
+import Settings from './screens/Settings';
+import DataAssets from './screens/DataAssets';
+import Disposal from './screens/Disposal';
+import Document from './screens/Document';
+import AssetIssuance from './screens/AssetIssuance';
+import ITDashboard from './screens/Dashboards/IT Dashboard/itdashboard';
+import AdminDashboard from './screens/Dashboards/Admin Dashboard/admindashboard';
+import VirtualDashboard from './screens/Dashboards/Virtual Dashboard/virtualdashboard';
+import AdminUsers from './screens/AdminUsers';
 
 const theme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#2FA6B4',
-      light: '#79D4E6',
-      dark: '#1E4D57',
+      main: '#0C5494',
+      light: '#e8f4fc',
+      dark: '#0a4278',
     },
     secondary: {
-      main: '#1E4D57',
-      light: '#BFEFFF',
+      main: '#0a4278',
+      light: '#bfdbfe',
     },
     background: {
-      default: '#F2FCFF',
+      default: '#f5f7fa',
       paper: '#FFFFFF',
     },
   },
@@ -74,7 +74,7 @@ function App() {
             } />
             
             <Route path="/it-dashboard" element={
-              <ProtectedRoute requiredRoles={['it']}>
+              <ProtectedRoute requiredRoles={['manager', 'it']}>
                 <ITDashboard />
               </ProtectedRoute>
             } />
@@ -85,15 +85,15 @@ function App() {
               </ProtectedRoute>
             } />
 
-            <Route path="/admin/users" element={
-              <ProtectedRoute requiredRoles={['admin']}>
-                <AdminUsers />
-              </ProtectedRoute>
-            } />
-
             <Route path="/virtual-dashboard" element={
               <ProtectedRoute requiredRoles={['virtual']}>
                 <VirtualDashboard />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/admin/users" element={
+              <ProtectedRoute requiredRoles={['admin']}>
+                <AdminUsers />
               </ProtectedRoute>
             } />
 
@@ -122,23 +122,29 @@ function App() {
             } />
 
             <Route path="/settings/it" element={
-              <ProtectedRoute requiredRoles={['admin', 'it']}>
+              <ProtectedRoute requiredRoles={['admin', 'manager', 'it']}>
                 <Settings />
               </ProtectedRoute>
             } />
             
             <Route path="/data-assets" element={
-              <ProtectedRoute requiredRoles={['admin', 'it']}>
+              <ProtectedRoute requiredRoles={['admin', 'manager', 'it']}>
                 <DataAssets />
               </ProtectedRoute>
             } />
             
             <Route path="/disposal" element={
-              <ProtectedRoute requiredRoles={['admin', 'it']}>
+              <ProtectedRoute requiredRoles={['admin', 'manager', 'it']}>
                 <Disposal />
               </ProtectedRoute>
             } />
-            
+
+            <Route path="/asset-issuance" element={
+              <ProtectedRoute requiredRoles={['admin', 'manager', 'it']}>
+                <AssetIssuance />
+              </ProtectedRoute>
+            } />
+
             <Route path="/document" element={
               <ProtectedRoute requiredRoles={['*']}>
                 <Document />

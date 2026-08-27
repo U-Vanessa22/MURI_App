@@ -1,190 +1,157 @@
-.app-sidebar {
-  width: 260px;
-  flex-shrink: 0;
-  height: 100%;
+.unified-sidebar {
+  box-sizing: border-box;
+  width: 252px;
+  min-height: 100vh;
   background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
-  transition: width 0.25s ease;
+  position: fixed;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  z-index: 1000;
   display: flex;
   flex-direction: column;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-  overflow-y: auto;
-  overflow-x: hidden;
+  padding: 18px 12px 14px;
+  box-shadow: 2px 0 16px rgba(15, 35, 53, 0.16);
 }
 
-.app-sidebar.collapsed {
-  width: 80px;
-}
-
-.app-sidebar-nav {
-  flex: 1;
-  padding: 16px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  overflow-y: auto;
-}
-
-.app-sidebar-item {
-  width: calc(100% - 20px);
-  margin: 0 10px;
+.unified-sidebar-brand {
   display: flex;
   align-items: center;
-  padding: 12px 15px;
-  color: #ecf0f1;
-  background: transparent;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-  text-align: left;
-  white-space: nowrap;
+  gap: 11px;
+  padding: 0 8px 20px;
+  color: #ffffff;
 }
 
-.app-sidebar-item:hover {
-  background: #34495e;
+.unified-sidebar-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #ffffff;
+  object-fit: contain;
+  padding: 3px;
 }
 
-.app-sidebar-item.active {
-  background: #0c5494;
-  box-shadow: 0 4px 10px rgba(12, 84, 148, 0.3);
-}
-
-.app-sidebar-item .icon {
-  font-size: 18px;
-  min-width: 30px;
-  text-align: center;
-  display: inline-flex;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.app-sidebar-item .text {
-  margin-left: 12px;
-  font-size: 14px;
-  font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.app-sidebar.collapsed .app-sidebar-item {
-  justify-content: center;
-  padding-inline: 0;
-}
-
-.app-sidebar.collapsed .app-sidebar-item .text {
-  display: none;
-}
-
-.app-sidebar-footer {
-  padding: 16px 12px;
-  border-top: 1px solid #34495e;
-}
-
-.app-sidebar .user-info {
-  display: flex;
-  align-items: center;
-  color: #ecf0f1;
-  margin-bottom: 12px;
-}
-
-.app-sidebar.collapsed .user-info {
-  justify-content: center;
-}
-
-.app-sidebar .user-avatar {
-  font-size: 26px;
-  min-width: 30px;
-  text-align: center;
-  display: inline-flex;
-  justify-content: center;
-  flex-shrink: 0;
-  color: #bdc3c7;
-}
-
-.app-sidebar .user-details {
-  margin-left: 10px;
-  overflow: hidden;
-}
-
-.app-sidebar.collapsed .user-details {
-  display: none;
-}
-
-.app-sidebar .user-name {
-  font-size: 14px;
-  font-weight: 500;
+.unified-sidebar-brand strong,
+.unified-sidebar-brand span {
   display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.app-sidebar .user-email {
-  font-size: 12px;
-  color: #bdc3c7;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.app-sidebar .signout-btn {
-  width: 100%;
-  padding: 10px 12px;
-  background: rgba(231, 76, 60, 0.1);
-  border: none;
-  border-radius: 8px;
-  color: #e74c3c;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
-}
-
-.app-sidebar.collapsed .signout-btn {
-  justify-content: center;
-}
-
-.app-sidebar .signout-btn:hover {
-  background: #e74c3c;
-  color: #fff;
-}
-
-.app-sidebar .signout-btn .icon {
+.unified-sidebar-brand strong {
   font-size: 16px;
-  min-width: 30px;
-  text-align: center;
-  display: inline-flex;
-  justify-content: center;
-  flex-shrink: 0;
+  letter-spacing: 0.02em;
 }
 
-.app-sidebar .signout-btn .text {
-  margin-left: 8px;
+.unified-sidebar-brand span {
+  margin-top: 2px;
+  color: #9cb3c6;
+  font-size: 11px;
+}
+
+.unified-sidebar-nav {
+  display: grid;
+  gap: 4px;
+}
+
+.unified-sidebar-item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #c2d0dc;
+  cursor: pointer;
+  font: inherit;
   font-size: 14px;
   font-weight: 500;
+  padding: 11px 12px;
+  text-align: left;
+  transition: background 0.16s ease, color 0.16s ease;
 }
 
-.app-sidebar.collapsed .signout-btn .text {
-  display: none;
+.unified-sidebar-item svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+}
+
+.unified-sidebar-item:hover,
+.unified-sidebar-item.active {
+  background: #0c5494;
+  color: #ffffff;
+}
+
+.unified-sidebar-footer {
+  display: grid;
+  gap: 5px;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.13);
+}
+
+.unified-sidebar-user {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  color: #c2d0dc;
+  font-size: 13px;
+  padding: 7px 10px;
+}
+
+.unified-sidebar-user > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.unified-sidebar-avatar {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #0c5494;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.unified-sidebar-signout {
+  color: #f4bdc3;
+}
+
+.unified-sidebar-signout:hover {
+  background: rgba(219, 73, 91, 0.2);
+  color: #ffffff;
+}
+
+.data-assets-page .main-content,
+.disposal-page .main-content,
+.document-page .main-content,
+.report-container .main-content,
+.chatbot-container .main-content,
+.asset-issuance-page .main-content,
+.voucher-container .voucher-main,
+.setting-container .setting-main,
+.simple-dashboard-root .simple-header,
+.simple-dashboard-root .simple-container {
+  margin-left: 252px;
 }
 
 @media (max-width: 768px) {
-  .app-sidebar {
-    width: 80px;
-  }
-
-  .app-sidebar .app-sidebar-item .text,
-  .app-sidebar .user-details {
-    display: none;
-  }
-
-  .app-sidebar .app-sidebar-item {
-    justify-content: center;
-    padding-inline: 0;
-  }
-
-  .app-sidebar .user-info {
-    justify-content: center;
+  .data-assets-page .main-content,
+  .disposal-page .main-content,
+  .document-page .main-content,
+  .report-container .main-content,
+  .chatbot-container .main-content,
+  .voucher-container .voucher-main,
+  .setting-container .setting-main,
+  .simple-dashboard-root .simple-header,
+  .simple-dashboard-root .simple-container {
+    margin-left: 0;
   }
 }
