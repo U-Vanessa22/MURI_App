@@ -98,6 +98,19 @@ export const voucherAPI = {
   },
 };
 
+export const assetAPI = {
+  create: async (payload) => (await api.post('/assets/', payload)).data,
+  list: async () => (await api.get('/assets/')).data,
+  update: async (assetId, payload) => (await api.patch(`/assets/${assetId}`, payload)).data,
+  remove: async (assetId) => api.delete(`/assets/${assetId}`),
+};
+
+export const assetVoucherAPI = {
+  create: async (payload) => (await api.post('/asset-vouchers/', payload)).data,
+  list: async () => (await api.get('/asset-vouchers/')).data,
+  returnAsset: async (voucherId) => (await api.patch(`/asset-vouchers/${voucherId}/return`)).data,
+};
+
 export const reportAPI = {
   getOverview: async () => {
     const response = await api.get('/reports/overview');
