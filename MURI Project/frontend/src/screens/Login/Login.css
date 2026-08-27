@@ -8,8 +8,8 @@
   font-family: 'Montserrat', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background:
     radial-gradient(circle at top left, rgba(191, 239, 255, 0.9), transparent 42%),
-    radial-gradient(circle at bottom right, rgba(47, 166, 180, 0.32), transparent 36%),
-    linear-gradient(135deg, #F2FCFF 0%, #BFEFFF 100%);
+    radial-gradient(circle at bottom right, rgba(12, 84, 148, 0.18), transparent 36%),
+    linear-gradient(135deg, #F5F7FA 0%, #E8F4FC 100%);
   color: #1e293b;
   box-sizing: border-box;
 }
@@ -32,7 +32,7 @@
 
 /* ===== LEFT SIDE - HERO ===== */
 .hero-side {
-  background: linear-gradient(135deg, #2FA6B4 0%, #1E4D57 100%);
+  background: linear-gradient(135deg, #0C5494 0%, #0A4278 100%);
   padding: 60px 50px;
   display: flex;
   flex-direction: column;
@@ -96,7 +96,7 @@
 .logo-fallback {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #2FA6B4, #1E4D57);
+  background: linear-gradient(135deg, #0C5494, #0A4278);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -169,7 +169,7 @@
 .login-header h2 {
   font-size: 2.5rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #2FA6B4, #1E4D57);
+  background: linear-gradient(135deg, #0C5494, #0A4278);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -220,8 +220,8 @@
 
 .form-input:focus {
   outline: none;
-  border-color: #2FA6B4;
-  box-shadow: 0 0 0 4px rgba(47, 166, 180, 0.12);
+  border-color: #0C5494;
+  box-shadow: 0 0 0 4px rgba(12, 84, 148, 0.12);
   background: white;
 }
 
@@ -249,14 +249,14 @@
 }
 
 .password-toggle:hover {
-  color: #1E4D57;
+  color: #0A4278;
 }
 
 /* ===== BUTTONS ===== */
 .submit-btn {
   width: 100%;
   padding: 20px;
-  background: linear-gradient(135deg, #2FA6B4, #1E4D57);
+  background: linear-gradient(135deg, #0C5494, #0A4278);
   color: white;
   border: none;
   border-radius: 12px;
@@ -266,12 +266,12 @@
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 10px 25px rgba(47, 166, 180, 0.28);
+  box-shadow: 0 10px 25px rgba(12, 84, 148, 0.28);
 }
 
 .submit-btn:hover {
   transform: translateY(-3px);
-  box-shadow: 0 15px 35px rgba(47, 166, 180, 0.36);
+  box-shadow: 0 15px 35px rgba(12, 84, 148, 0.36);
 }
 
 .submit-btn:active {
@@ -292,11 +292,11 @@
 }
 
 .signin-btn {
-  background: linear-gradient(135deg, #2FA6B4, #1E4D57);
+  background: linear-gradient(135deg, #0C5494, #0A4278);
 }
 
 .signup-btn {
-  background: linear-gradient(135deg, #79D4E6, #2FA6B4);
+  background: linear-gradient(135deg, #E8F4FC, #0C5494);
 }
 
 .btn-text {
@@ -331,9 +331,9 @@
 .terms-acceptance-box {
   margin: 10px 0 20px;
   padding: 12px;
-  border: 1px solid rgba(47, 166, 180, 0.18);
+  border: 1px solid rgba(12, 84, 148, 0.18);
   border-radius: 10px;
-  background: rgba(242, 252, 255, 0.92);
+  background: rgba(232, 244, 252, 0.92);
   text-align: left;
 }
 
@@ -355,7 +355,7 @@
   margin-top: 10px;
   background: transparent;
   border: none;
-  color: #1E4D57;
+  color: #0A4278;
   font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
@@ -439,7 +439,7 @@
 }
 
 .policy-note a {
-  color: #2FA6B4;
+  color: #0C5494;
   font-weight: 600;
 }
 
@@ -449,7 +449,7 @@
   padding: 20px;
   background: linear-gradient(135deg, #f2fcff, #d7f7ff);
   border-radius: 12px;
-  border-left: 4px solid #2FA6B4;
+  border-left: 4px solid #0C5494;
   text-align: center;
   animation: login-pulse 2s infinite;
 }
@@ -461,7 +461,7 @@
 }
 
 .demo-info .highlight {
-  color: #1E4D57;
+  color: #0A4278;
   font-weight: 700;
 }
 
