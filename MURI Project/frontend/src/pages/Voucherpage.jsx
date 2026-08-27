@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Bell, User, Calendar, FileText, Upload } from 'lucide-react';
+import { Calendar, FileText, Upload, Flag, User, MapPin, Clock } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import './voucherpage.css';
-import UnifiedSidebar from '../components/layout/UnifiedSidebar';
+import AppLayout from '../components/layout/AppLayout';
 import { documentAPI, voucherAPI } from '../services/api';
-import { useThemeMode } from '../contexts/ThemeContext';
 
 const DRAFT_STORAGE_KEY = 'muri_voucher_draft';
 // Labels and colors match the 5 real backend statuses and the locked Style Guide
@@ -46,7 +45,6 @@ const VoucherPage = () => {
   const [notesState, setNotesState] = useState({});
   const [documentLinkState, setDocumentLinkState] = useState({});
   const [updatingTicketIds, setUpdatingTicketIds] = useState(new Set());
-  const { darkMode, toggleDarkMode } = useThemeMode();
 
   const currentUser = useMemo(() => {
     try {
@@ -82,7 +80,7 @@ const VoucherPage = () => {
   }, []);
 
   const normalizedRole = (currentUser?.role || '').toLowerCase();
-  const isITRole = ['admin', 'manager', 'it'].includes(normalizedRole);
+  const isITRole = ['admin', 'it'].includes(normalizedRole);
   const isUserRole = normalizedRole === 'user';
   const canManageTickets = isITRole;
   const canCreateVoucher = isUserRole;
@@ -331,9 +329,7 @@ const VoucherPage = () => {
   };
 
   return (
-    <div className="voucher-container">
-      <UnifiedSidebar activePath="/voucher" />
-
+    <AppLayout activePath="/voucher">
       {/* Main Content */}
       <main className="voucher-main">
         <header className="voucher-header">
@@ -341,35 +337,24 @@ const VoucherPage = () => {
             <h1>Ticket</h1>
             <p>Submit support requests, save drafts, and track progress in real time</p>
           </div>
-          <div className="voucher-header-right">
-            <button className="voucher-icon-btn" type="button" title="Toggle dark mode" onClick={toggleDarkMode}>
-              {darkMode ? '☀️' : '🌙'}
-            </button>
-            <button className="voucher-icon-btn">
-              <Bell size={20} />
-            </button>
-            <div className="voucher-user">
-              <User size={20} />
-            </div>
-          </div>
         </header>
 
-        <div className="voucher-tabs">
-          {canCreateVoucher && (
+        {canCreateVoucher && (
+          <div className="voucher-tabs">
             <button
               className={`voucher-tab ${activeTab === 'create' ? 'active' : ''}`}
               onClick={() => setActiveTab('create')}
             >
               <Calendar size={20} /> Book Appointment
             </button>
-          )}
-          <button
-            className={`voucher-tab ${activeTab === 'list' ? 'active' : ''}`}
-            onClick={() => setActiveTab('list')}
-          >
-            <FileText size={20} /> {canCreateVoucher ? 'View Requests' : 'All Requests'}
-          </button>
-        </div>
+            <button
+              className={`voucher-tab ${activeTab === 'list' ? 'active' : ''}`}
+              onClick={() => setActiveTab('list')}
+            >
+              <FileText size={20} /> View Requests
+            </button>
+          </div>
+        )}
 
         {message && (
           <div className={`voucher-message voucher-message-${messageType}`} role={messageType === 'error' ? 'alert' : 'status'}>
@@ -569,7 +554,7 @@ const VoucherPage = () => {
         </div>}
 
         {activeTab === 'list' && (
-          <div className="voucher-form-container">
+          <div className="voucher-list-container">
             <h2>Submitted Tickets</h2>
             <p>Monitor and update ticket progress</p>
 
@@ -587,10 +572,8 @@ const VoucherPage = () => {
               <div className="voucher-ticket-grid">
                 {displayedTickets.map((ticket) => (
                   <div key={ticket.id} className={`voucher-ticket-card ${hasTicketFilter ? 'voucher-ticket-card-focus' : ''}`}>
-                    <h4>{ticket.ticket_number} • {ticket.title}</h4>
-                    <p>{ticket.description}</p>
-                    <p>
-                      Priority: <strong>{ticket.priority}</strong> | Status:{' '}
+                    <div className="voucher-ticket-card-top">
+                      <span className="voucher-ticket-number">{ticket.ticket_number}</span>
                       <span
                         className="voucher-status-badge"
                         style={{
@@ -600,15 +583,24 @@ const VoucherPage = () => {
                       >
                         {getStatusMeta(ticket.status).label}
                       </span>
-                    </p>
-                    <p><strong>Raised by:</strong> {ticket.requester_name || ticket.requester_email || 'Unknown staff member'}</p>
-                    <p><strong>Station:</strong> {ticket.requester_station || 'Not provided'}</p>
-                    <p><strong>Severity:</strong> {ticket.severity || ticket.priority || 'medium'}</p>
+                    </div>
+
+                    <h4 className="voucher-ticket-title">{ticket.title}</h4>
+                    <p className="voucher-ticket-desc">{ticket.description}</p>
+
+                    <div className="voucher-ticket-meta">
+                      <span className="voucher-ticket-chip"><Flag size={12} /> {ticket.priority || 'medium'}</span>
+                      {ticket.severity && ticket.severity !== ticket.priority && (
+                        <span className="voucher-ticket-chip">Severity: {ticket.severity}</span>
+                      )}
+                      <span className="voucher-ticket-chip"><User size={12} /> {ticket.requester_name || ticket.requester_email || 'Unknown staff member'}</span>
+                      <span className="voucher-ticket-chip"><MapPin size={12} /> {ticket.requester_station || 'Not provided'}</span>
+                    </div>
+
                     {(ticket.preferred_date || ticket.preferred_time) && (
-                      <p>
-                        <strong>Preferred appointment:</strong>{' '}
-                        {[ticket.preferred_date, ticket.preferred_time].filter(Boolean).join(' ')}
-                      </p>
+                      <div className="voucher-ticket-appointment">
+                        <Clock size={12} /> {[ticket.preferred_date, ticket.preferred_time].filter(Boolean).join(' ')}
+                      </div>
                     )}
 
                     {canManageTickets && (
@@ -695,7 +687,7 @@ const VoucherPage = () => {
 
         <footer className="voucher-footer">©2026. MURI</footer>
       </main>
-    </div>
+    </AppLayout>
   );
 };
 

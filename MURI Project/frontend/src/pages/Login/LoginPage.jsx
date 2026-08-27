@@ -1,14 +1,15 @@
 // src/pages/Login/LoginPage.jsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { getDashboardPathForRole } from '../../utils/dashboardRoutes';
 import './Login.css';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, user, loading: authLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -16,6 +17,13 @@ const LoginPage = () => {
   const [error, setError] = useState(null);
   const [acceptedPolicies, setAcceptedPolicies] = useState(false);
   const [showPoliciesModal, setShowPoliciesModal] = useState(false);
+
+  // If already logged in, never show the login form — go straight to the dashboard.
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate(getDashboardPathForRole(user.role), { replace: true });
+    }
+  }, [authLoading, user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,15 +52,7 @@ const LoginPage = () => {
       const result = await login(email, password);
       
       if (result.success) {
-        // Get user role from response
-        const userRole = (result.data?.user?.role || 'user').toLowerCase();
-        
-        // Redirect based on role
-        if (userRole === 'admin' || userRole === 'manager' || userRole === 'it') {
-          navigate('/it-dashboard');
-        } else {
-          navigate('/user-dashboard');
-        }
+        navigate(getDashboardPathForRole(result.data?.user?.role));
       } else {
         setError(result.error || 'Login failed');
       }
@@ -70,6 +70,16 @@ const LoginPage = () => {
       fallback.style.display = 'flex';
     }
   };
+
+  // Auth check still in flight, or already logged in (redirect effect above will fire) —
+  // don't flash the login form in either case.
+  if (authLoading || user) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <div className="loading-spinner">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="login-page-root">

@@ -1,15 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { FaLaptop, FaTicketAlt, FaRobot } from 'react-icons/fa';
+import { FaTicketAlt, FaFileContract, FaChartBar, FaCheckCircle } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { documentAPI, reportAPI, voucherAPI } from '../../../services/api';
+import { reportAPI, voucherAPI } from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useThemeMode } from '../../../contexts/ThemeContext';
 import AppLayout from '../../../components/layout/AppLayout';
-import './itdashboard.css';
+import './virtualdashboard.css';
 
-const DOCUMENT_TYPES = {
-  receiving: 'receiving',
-};
+const UNRESOLVED_STATUSES = ['open', 'assigned', 'in_progress'];
 
 const StatCard = ({ loading, value, label, onClick }) => (
   <div
@@ -31,21 +29,17 @@ const StatCard = ({ loading, value, label, onClick }) => (
   </div>
 );
 
-const ITDashboard = () => {
+const VirtualDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { darkMode } = useThemeMode();
   const [notifications, setNotifications] = useState([]);
   const [stats, setStats] = useState({
-    // Real device/asset inventory isn't built yet (Bundle B) — no backend
-    // data exists to show here.
-    totalAssets: 0,
-    activeTickets: 0,
+    total: 0,
     resolved: 0,
-    pending: 0,
+    unresolved: 0,
+    resolutionRate: 0,
   });
-  const [recentActivity, setRecentActivity] = useState([]);
-  const [workloadBoard, setWorkloadBoard] = useState([]);
   const [queueSnapshot, setQueueSnapshot] = useState({
     open: 0,
     assigned: 0,
@@ -53,11 +47,10 @@ const ITDashboard = () => {
     resolved: 0,
     closed: 0,
   });
-  const [documentQueue, setDocumentQueue] = useState({
-    receiving: 0,
-    pendingSignatures: 0,
-    signedReturned: 0,
-  });
+  const [slaHealth, setSlaHealth] = useState({ breached: 0, atRisk: 0 });
+  const [workloadBoard, setWorkloadBoard] = useState([]);
+  const [attentionTickets, setAttentionTickets] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [dataError, setDataError] = useState('');
   const [toastMessage, setToastMessage] = useState('');
@@ -112,11 +105,12 @@ const ITDashboard = () => {
 
   const loadNotifications = useCallback(async () => {
     const latestNotifications = await reportAPI.getNotifications({
-      limit: 30,
+      limit: 100,
       target_email: user?.email || undefined,
     });
     setNotifications(latestNotifications || []);
     maybeNotifyUnreadIncrease(latestNotifications || []);
+    return latestNotifications || [];
   }, [maybeNotifyUnreadIncrease, user?.email]);
 
   useEffect(() => {
@@ -126,65 +120,58 @@ const ITDashboard = () => {
       try {
         setDataError('');
 
-        const [overview, vouchers, documents] = await Promise.all([
+        const [overview, vouchers] = await Promise.all([
           reportAPI.getOverview(),
           voucherAPI.list(),
-          documentAPI.list(),
         ]);
 
         await reportAPI.checkSla();
-        await loadNotifications();
+        const allNotifications = await loadNotifications();
 
-        setStats((prev) => ({
-          ...prev,
-          activeTickets: (overview.open || 0) + (overview.assigned || 0) + (overview.in_progress || 0),
-          resolved: overview.resolved || 0,
-          pending: overview.open || 0,
-        }));
-        setWorkloadBoard(overview.workload || []);
+        const resolvedCount = (overview.resolved || 0) + (overview.closed || 0);
+        const unresolvedCount = (overview.open || 0) + (overview.assigned || 0) + (overview.in_progress || 0);
+        const total = overview.total || (resolvedCount + unresolvedCount);
 
-        const nextQueueSnapshot = (vouchers || []).reduce(
-          (accumulator, ticket) => {
-            const key = ticket.status;
-            if (Object.prototype.hasOwnProperty.call(accumulator, key)) {
-              accumulator[key] += 1;
-            }
-            return accumulator;
-          },
-          {
-            open: 0,
-            assigned: 0,
-            in_progress: 0,
-            resolved: 0,
-            closed: 0,
-          }
-        );
-        setQueueSnapshot(nextQueueSnapshot);
-
-        const receivingDocuments = (documents || []).filter(
-          (doc) => (doc.document_type || '') === DOCUMENT_TYPES.receiving
-        );
-        const pendingSignatures = receivingDocuments.filter(
-          (doc) => (doc.signature_status || 'not_required') === 'pending_user_signature'
-        );
-        const signedReturned = receivingDocuments.filter(
-          (doc) =>
-            (doc.signature_status || 'not_required') === 'signed' ||
-            (doc.status || '') === 'returned_to_it'
-        );
-        setDocumentQueue({
-          receiving: receivingDocuments.length,
-          pendingSignatures: pendingSignatures.length,
-          signedReturned: signedReturned.length,
+        setStats({
+          total,
+          resolved: resolvedCount,
+          unresolved: unresolvedCount,
+          resolutionRate: total > 0 ? Math.round((resolvedCount / total) * 100) : 0,
         });
 
-        const recent = vouchers.slice(0, 8).map((item) => ({
-          id: item.id,
-          title: `${item.ticket_number} • ${item.title}`,
-          time: new Date(item.updated_at).toLocaleString(),
-          icon: <FaTicketAlt />,
-        }));
+        setQueueSnapshot({
+          open: overview.open || 0,
+          assigned: overview.assigned || 0,
+          in_progress: overview.in_progress || 0,
+          resolved: overview.resolved || 0,
+          closed: overview.closed || 0,
+        });
 
+        setWorkloadBoard(overview.workload || []);
+
+        const unreadNotifications = allNotifications.filter((item) => !item.is_read);
+        setSlaHealth({
+          breached: unreadNotifications.filter((item) => item.category === 'sla_breached').length,
+          atRisk: unreadNotifications.filter((item) => item.category === 'sla_at_risk').length,
+        });
+
+        const unresolvedTickets = (vouchers || []).filter((ticket) =>
+          UNRESOLVED_STATUSES.includes(ticket.status)
+        );
+        const oldestUnresolved = [...unresolvedTickets]
+          .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+          .slice(0, 6);
+        setAttentionTickets(oldestUnresolved);
+
+        const recent = [...(vouchers || [])]
+          .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
+          .slice(0, 8)
+          .map((item) => ({
+            id: item.id,
+            title: `${item.ticket_number} • ${item.title}`,
+            time: new Date(item.updated_at).toLocaleString(),
+            icon: <FaTicketAlt />,
+          }));
         setRecentActivity(recent);
       } catch (error) {
         setDataError(error?.response?.data?.detail || 'Failed to load dashboard data');
@@ -242,13 +229,20 @@ const ITDashboard = () => {
     navigate(`/voucher${queryString ? `?${queryString}` : ''}`);
   };
 
+  const daysOpen = (createdAt) => {
+    const created = new Date(createdAt);
+    const diffMs = Date.now() - created.getTime();
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    return days <= 0 ? 'Today' : `${days} day${days > 1 ? 's' : ''} open`;
+  };
+
   if (!user) {
     return null;
   }
 
   return (
     <AppLayout
-      activePath="/it-dashboard"
+      activePath="/virtual-dashboard"
       notifications={notifications}
       onMarkNotificationRead={handleMarkNotificationRead}
       onMarkAllNotificationsRead={handleMarkAllNotificationsRead}
@@ -278,9 +272,9 @@ const ITDashboard = () => {
         <main className="simple-main">
           {/* Welcome Section */}
           <section className="simple-welcome">
-            <h1>Welcome back, {user.full_name || user.username || 'User'}!</h1>
+            <h1>Welcome back, {user.full_name || user.username || 'there'}!</h1>
             <div className="welcome-subtitle">
-              <p>Here's what's happening with your assets today.</p>
+              <p>Ticket progress overview — monitor resolution and SLA health across MURI.</p>
               {user.department && user.station && (
                 <div className="user-context">
                   <span className="context-badge">{user.department}</span>
@@ -298,19 +292,29 @@ const ITDashboard = () => {
               </div>
             )}
             <div className="simple-stats-grid">
-              <StatCard loading={dataLoading} value={stats.totalAssets} label="Total Assets" />
-              <StatCard loading={dataLoading} value={stats.activeTickets} label="Active Tickets" />
+              <StatCard loading={dataLoading} value={stats.total} label="Total Tickets" onClick={() => navigate('/voucher')} />
               <StatCard loading={dataLoading} value={stats.resolved} label="Resolved" />
-              <StatCard loading={dataLoading} value={stats.pending} label="Pending" />
+              <StatCard loading={dataLoading} value={stats.unresolved} label="Unresolved" onClick={() => navigate('/voucher')} />
+              <StatCard loading={dataLoading} value={`${stats.resolutionRate}%`} label="Resolution Rate" />
             </div>
           </section>
 
           <section className="simple-stats-section">
-            <h2 className="simple-section-title">Document Signature Workflow</h2>
+            <h2 className="simple-section-title">SLA Health</h2>
             <div className="simple-stats-grid">
-              <StatCard loading={dataLoading} value={documentQueue.receiving} label="Receiving Documents" onClick={() => navigate('/document')} />
-              <StatCard loading={dataLoading} value={documentQueue.pendingSignatures} label="Pending User Signatures" onClick={() => navigate('/document')} />
-              <StatCard loading={dataLoading} value={documentQueue.signedReturned} label="Signed and Returned to IT" onClick={() => navigate('/document')} />
+              <StatCard loading={dataLoading} value={slaHealth.breached} label="SLA Breached" />
+              <StatCard loading={dataLoading} value={slaHealth.atRisk} label="SLA At Risk" />
+            </div>
+          </section>
+
+          <section className="simple-stats-section">
+            <h2 className="simple-section-title">Ticket Status Breakdown</h2>
+            <div className="simple-stats-grid">
+              <StatCard loading={dataLoading} value={queueSnapshot.open} label="Open" />
+              <StatCard loading={dataLoading} value={queueSnapshot.assigned} label="Assigned" />
+              <StatCard loading={dataLoading} value={queueSnapshot.in_progress} label="In Progress" />
+              <StatCard loading={dataLoading} value={queueSnapshot.resolved} label="Resolved" />
+              <StatCard loading={dataLoading} value={queueSnapshot.closed} label="Closed" />
             </div>
           </section>
 
@@ -320,50 +324,38 @@ const ITDashboard = () => {
             <div className="simple-actions-grid">
               <div
                 className="simple-action-card"
-                onClick={() => navigate('/data-assets')}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="simple-action-icon">
-                  <FaLaptop />
-                </div>
-                <h3>My Assets</h3>
-                <p>View and manage your assigned assets</p>
-              </div>
-
-              <div
-                className="simple-action-card"
                 onClick={() => navigate('/voucher')}
                 style={{ cursor: 'pointer' }}
               >
                 <div className="simple-action-icon">
                   <FaTicketAlt />
                 </div>
-                <h3>Submit Request</h3>
-                <p>Create a new support ticket</p>
+                <h3>All Tickets</h3>
+                <p>Review every ticket and its current progress</p>
               </div>
 
               <div
                 className="simple-action-card"
-                onClick={() => navigate('/voucher?filter=my-tickets')}
+                onClick={() => navigate('/document')}
                 style={{ cursor: 'pointer' }}
               >
                 <div className="simple-action-icon">
-                  <FaTicketAlt />
+                  <FaFileContract />
                 </div>
-                <h3>My Tickets</h3>
-                <p>Check your ticket status</p>
+                <h3>Documents</h3>
+                <p>Check linked receiving/return documents</p>
               </div>
 
               <div
                 className="simple-action-card"
-                onClick={() => navigate('/chatbot')}
+                onClick={() => navigate('/report')}
                 style={{ cursor: 'pointer' }}
               >
                 <div className="simple-action-icon">
-                  <FaRobot />
+                  <FaChartBar />
                 </div>
-                <h3>AI Chatbot</h3>
-                <p>Get instant help from our AI</p>
+                <h3>Reports</h3>
+                <p>System-wide analytics and SLA history</p>
               </div>
             </div>
           </section>
@@ -397,17 +389,47 @@ const ITDashboard = () => {
                 ))}
               </div>
             )}
+          </section>
 
-            <div className="simple-stats-grid" style={{ marginTop: '12px' }}>
-              <StatCard loading={dataLoading} value={queueSnapshot.open} label="Open Queue" />
-              <StatCard loading={dataLoading} value={queueSnapshot.assigned} label="Assigned Queue" />
-              <StatCard loading={dataLoading} value={queueSnapshot.in_progress} label="In Progress Queue" />
-            </div>
+          <section className="simple-activity-section">
+            <h2 className="simple-section-title">Tickets Needing Attention</h2>
+            {dataLoading && (
+              <div style={{ display: 'grid', gap: '10px' }}>
+                {[0, 1, 2].map((key) => (
+                  <div key={key} className="simple-activity-item skeleton-row-block" />
+                ))}
+              </div>
+            )}
+            {!dataLoading && attentionTickets.length === 0 && (
+              <p><FaCheckCircle style={{ marginRight: '6px' }} />Nothing unresolved — all caught up.</p>
+            )}
+            {!dataLoading && attentionTickets.length > 0 && (
+              <div className="simple-activity-list">
+                {attentionTickets.map((ticket) => (
+                  <div
+                    key={ticket.id}
+                    className="simple-activity-item"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => navigate(`/voucher?voucher_id=${ticket.id}&ticket=${ticket.ticket_number}`)}
+                  >
+                    <div className="simple-activity-text">
+                      <div className="simple-activity-icon"><FaTicketAlt /></div>
+                      <div>
+                        <h4>{ticket.ticket_number} • {ticket.title}</h4>
+                        <p className="simple-activity-time">
+                          {daysOpen(ticket.created_at)} • {ticket.status.replace('_', ' ')} • {ticket.priority} priority
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
 
           {/* Recent Activity */}
           <section className="simple-activity-section">
-            <h2 className="simple-section-title">Recent Activity</h2>
+            <h2 className="simple-section-title">Recent Ticket Activity</h2>
             <div className="simple-activity-list">
               {dataLoading && [0, 1, 2].map((key) => (
                 <div key={key} className="simple-activity-item skeleton-row-block" />
@@ -436,4 +458,4 @@ const ITDashboard = () => {
   );
 };
 
-export default ITDashboard;
+export default VirtualDashboard;

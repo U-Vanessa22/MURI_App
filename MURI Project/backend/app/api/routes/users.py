@@ -5,9 +5,12 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 from app.db.session import SessionLocal
 from app.models.user import User
+from app.models.voucher import Voucher
+from app.models.document import Document
 from app.core.security import hash_password
 from app.api.deps import require_it_user
 from app.schemas.auth_schema import RegisterRequest
+from app.schemas.user_schema import UserUpdateRequest
 
 router = APIRouter()
 ORG_DOMAIN = "@icttoolsasm.com"
@@ -103,6 +106,99 @@ def list_it_personnel(db: Session = Depends(get_db)):
         }
         for user in users
     ]
+
+
+@router.patch("/{user_id}")
+def update_user(
+    user_id: int,
+    payload: UserUpdateRequest,
+    db: Session = Depends(get_db),
+    current_it_user: User = Depends(require_it_user),
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if payload.role is not None and user.id == current_it_user.id:
+        raise HTTPException(status_code=400, detail="You cannot change your own role")
+
+    if payload.email is not None:
+        if not payload.email.endswith(ORG_DOMAIN):
+            raise HTTPException(status_code=400, detail="Use organization email")
+        existing = db.query(User).filter(User.email == payload.email, User.id != user_id).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Email already registered")
+        user.email = payload.email
+
+    if payload.username is not None:
+        existing = db.query(User).filter(User.username == payload.username, User.id != user_id).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Username already taken")
+        user.username = payload.username
+
+    if payload.full_name is not None:
+        user.full_name = payload.full_name
+
+    if payload.department is not None:
+        user.department = payload.department
+
+    if payload.station is not None:
+        user.station = payload.station
+
+    if payload.role is not None:
+        user.role = payload.role.upper()
+
+    db.commit()
+    db.refresh(user)
+
+    return {
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "full_name": user.full_name,
+        "department": user.department,
+        "station": user.station,
+        "role": user.role,
+        "is_active": user.is_active,
+        "created_at": user.created_at,
+    }
+
+
+@router.delete("/{user_id}")
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_it_user: User = Depends(require_it_user),
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if user.id == current_it_user.id:
+        raise HTTPException(status_code=400, detail="You cannot delete your own account")
+
+    has_voucher_history = (
+        db.query(Voucher.id)
+        .filter((Voucher.requester_id == user_id) | (Voucher.assigned_to_id == user_id))
+        .first()
+        is not None
+    )
+    has_document_history = (
+        db.query(Document.id)
+        .filter((Document.approved_by_id == user_id) | (Document.submitted_by_id == user_id))
+        .first()
+        is not None
+    )
+
+    if has_voucher_history or has_document_history:
+        raise HTTPException(
+            status_code=400,
+            detail="This user has ticket or document history and cannot be deleted. Deactivate the account instead.",
+        )
+
+    db.delete(user)
+    db.commit()
+    return {"message": "User deleted successfully"}
 
 
 @router.patch("/{user_id}/reset-password")

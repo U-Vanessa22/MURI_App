@@ -16,6 +16,9 @@ import DataAssets from './pages/DataAssets';
 import Disposal from './pages/Disposal';
 import Document from './pages/Document';
 import ITDashboard from './pages/Dashboards/IT Dashboard/itdashboard';
+import AdminDashboard from './pages/Dashboards/Admin Dashboard/admindashboard';
+import AdminUsers from './pages/AdminUsers';
+import VirtualDashboard from './pages/Dashboards/Virtual Dashboard/virtualdashboard';
 
 const theme = createTheme({
   palette: {
@@ -71,11 +74,29 @@ function App() {
             } />
             
             <Route path="/it-dashboard" element={
-              <ProtectedRoute requiredRoles={['admin', 'manager', 'it']}>
+              <ProtectedRoute requiredRoles={['it']}>
                 <ITDashboard />
               </ProtectedRoute>
             } />
-            
+
+            <Route path="/admin-dashboard" element={
+              <ProtectedRoute requiredRoles={['admin']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/admin/users" element={
+              <ProtectedRoute requiredRoles={['admin']}>
+                <AdminUsers />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/virtual-dashboard" element={
+              <ProtectedRoute requiredRoles={['virtual']}>
+                <VirtualDashboard />
+              </ProtectedRoute>
+            } />
+
             <Route path="/voucher" element={
               <ProtectedRoute requiredRoles={['*']}>
                 <VoucherPage />
@@ -101,19 +122,19 @@ function App() {
             } />
 
             <Route path="/settings/it" element={
-              <ProtectedRoute requiredRoles={['admin', 'manager', 'it']}>
+              <ProtectedRoute requiredRoles={['admin', 'it']}>
                 <Settings />
               </ProtectedRoute>
             } />
             
             <Route path="/data-assets" element={
-              <ProtectedRoute requiredRoles={['admin', 'manager', 'it']}>
+              <ProtectedRoute requiredRoles={['admin', 'it']}>
                 <DataAssets />
               </ProtectedRoute>
             } />
             
             <Route path="/disposal" element={
-              <ProtectedRoute requiredRoles={['admin', 'manager', 'it']}>
+              <ProtectedRoute requiredRoles={['admin', 'it']}>
                 <Disposal />
               </ProtectedRoute>
             } />

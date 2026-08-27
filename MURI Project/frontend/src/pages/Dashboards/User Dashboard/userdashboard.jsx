@@ -1,55 +1,44 @@
 import React, { useState, useEffect } from 'react';
-import {
-  FaHome,
-  FaLaptop,
-  FaTicketAlt,
-  FaRobot,
-  FaUser,
-  FaSignOutAlt,
-  FaFile,
-  FaChartBar,
-} from 'react-icons/fa';
-import { FiMenu } from 'react-icons/fi';
+import { FaLaptop, FaTicketAlt, FaRobot, FaFile } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useThemeMode } from '../../../contexts/ThemeContext';
 import { voucherAPI } from '../../../services/api';
+import AppLayout from '../../../components/layout/AppLayout';
 import './userdashboard.css';
 
 const PENDING_STATUSES = ['open', 'assigned', 'in_progress'];
 const DONE_STATUSES = ['resolved', 'closed'];
 
+const StatCard = ({ loading, value, label, onClick }) => (
+  <div
+    className="simple-stat-card"
+    style={onClick && !loading ? { cursor: 'pointer' } : undefined}
+    onClick={loading ? undefined : onClick}
+  >
+    {loading ? (
+      <>
+        <span className="stat-skeleton-value" aria-hidden="true" />
+        <span className="stat-skeleton-label" aria-hidden="true" />
+      </>
+    ) : (
+      <>
+        <div className="simple-stat-value">{value}</div>
+        <div className="simple-stat-label">{label}</div>
+      </>
+    )}
+  </div>
+);
+
 const UserDashboard = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
-  const { darkMode, toggleDarkMode } = useThemeMode();
-  const [activeNav, setActiveNav] = useState('home');
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const { darkMode } = useThemeMode();
   const [notifications] = useState([]);
   const [myTickets, setMyTickets] = useState([]);
   const [ticketsLoading, setTicketsLoading] = useState(true);
   const [ticketsError, setTicketsError] = useState('');
-
-  // Check authentication on component mount
-  useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    const storedUser = localStorage.getItem('user');
-
-    if (!token || !storedUser) {
-      navigate('/login');
-      return;
-    }
-
-    try {
-      JSON.parse(storedUser);
-      setLoading(false);
-    } catch {
-      navigate('/login');
-    }
-  }, [navigate]);
 
   // Load this user's own tickets — the backend doesn't filter by requester,
   // so we fetch everything and keep only tickets this user raised.
@@ -100,181 +89,14 @@ const UserDashboard = () => {
       icon: <FaTicketAlt />,
     }));
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
-  // Generate initials for avatar
-  const getUserInitials = () => {
-    if (user?.email) {
-      return user.email.charAt(0).toUpperCase();
-    }
-    return 'U';
-  };
-
-  if (loading) {
-    return (
-      <div className="loading-container">
-        <div className="spinner"></div>
-        <p>Loading dashboard...</p>
-      </div>
-    );
-  }
-
   if (!user) {
     return null;
   }
 
   return (
+    <AppLayout activePath="/user-dashboard" notifications={notifications}>
     <div className={`simple-dashboard-root ${darkMode ? 'dark' : ''}`}>
-      {/* Header */}
-      <header className="simple-header">
-        <div className="simple-header-left">
-          <button
-            className="simple-menu-btn"
-            aria-label="Toggle navigation"
-            onClick={() => setSidebarCollapsed((prev) => !prev)}
-          >
-            <FiMenu />
-          </button>
-          <div className="simple-logo">
-            <img
-              src="/Logo.png"
-              alt="MURI Logo"
-              className="simple-logo-image"
-            />
-          </div>
-        </div>
-
-        <div className="simple-header-right">
-          <button
-            className="simple-icon-btn"
-            aria-label="Toggle notifications"
-            onClick={() => setShowNotifications((prev) => !prev)}
-          >
-            🔔
-            {notifications.length > 0 && (
-              <span className="notification-badge">{notifications.length}</span>
-            )}
-          </button>
-          <button
-            className="simple-icon-btn"
-            aria-label="Toggle theme"
-            onClick={toggleDarkMode}
-          >
-            {darkMode ? '☀️' : '🌙'}
-          </button>
-          <div className="simple-user">
-            <div className="simple-avatar">
-              {getUserInitials()}
-            </div>
-            <div className="simple-user-info">
-              <div className="simple-user-name">
-                {user.email}
-              </div>
-              <div className="simple-user-role">
-                {user.role || 'User'}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {showNotifications && (
-          <div className="simple-notification-panel">
-            <h4>Notifications</h4>
-            {notifications.length > 0 ? (
-              notifications.map(notification => (
-                <div key={notification.id} className="notification-item">
-                  {notification.message}
-                </div>
-              ))
-            ) : (
-              <p>No new notifications</p>
-            )}
-          </div>
-        )}
-      </header>
-
-      <div className={`simple-container ${sidebarCollapsed ? 'collapsed' : ''}`}>
-        {/* Sidebar */}
-        <nav className={`simple-sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
-          <ul className="simple-nav-menu">
-            <li
-              className={`simple-nav-item ${
-                activeNav === 'home' ? 'active' : ''
-              }`}
-              onClick={() => {
-                setActiveNav('home');
-                navigate('/user-dashboard');
-              }}
-            >
-              <FaHome />
-              <span className="simple-nav-label">Home</span>
-            </li>
-
-            <li
-              className={`simple-nav-item ${
-                activeNav === 'voucher' ? 'active' : ''
-              }`}
-              onClick={() => { setActiveNav('voucher'); navigate('/voucher'); }}
-            >
-              <FaTicketAlt />
-              <span className="simple-nav-label">Ticket</span>
-            </li>
-
-            <li
-              className={`simple-nav-item ${
-                activeNav === 'chat' ? 'active' : ''
-              }`}
-              onClick={() => { setActiveNav('chat'); navigate('/chatbot'); }}
-            >
-              <FaRobot />
-              <span className="simple-nav-label">Chatbot</span>
-            </li>
-
-            <li
-              className={`simple-nav-item ${
-                activeNav === 'document' ? 'active' : ''
-              }`}
-              onClick={() => { setActiveNav('document'); navigate('/document'); }}
-            >
-              <FaFile />
-              <span className="simple-nav-label">Document</span>
-            </li>
-
-            <li
-              className={`simple-nav-item ${
-                activeNav === 'reports' ? 'active' : ''
-              }`}
-               onClick={() => { setActiveNav('reports'); navigate('/report'); }}
-           >
-             <FaChartBar />
-              <span className="simple-nav-label">Reports</span>
-            </li>
-
-            <li
-              className={`simple-nav-item ${
-                activeNav === 'settings' ? 'active' : ''
-              }`}
-              onClick={() => { setActiveNav('settings'); navigate('/settings'); }}
-            >
-              <FaUser />
-              <span className="simple-nav-label">Settings</span>
-            </li>
-
-            {/* Logout button */}
-            <li
-              className="simple-nav-item simple-logout"
-              onClick={handleLogout}
-            >
-              <FaSignOutAlt />
-              <span className="simple-nav-label">Sign Out</span>
-            </li>
-          </ul>
-        </nav>
-
-        {/* Main Content */}
+      {/* Main Content */}
         <main className="simple-main">
           {/* Welcome Section */}
           <section className="simple-welcome">
@@ -290,22 +112,10 @@ const UserDashboard = () => {
               <div style={{ marginBottom: '10px', color: '#b91c1c' }}>{ticketsError}</div>
             )}
             <div className="simple-stats-grid">
-              <div className="simple-stat-card">
-                <div className="simple-stat-value">{stats.totalAssets}</div>
-                <div className="simple-stat-label">My Assets</div>
-              </div>
-              <div className="simple-stat-card">
-                <div className="simple-stat-value">{ticketsLoading ? '—' : stats.myTickets}</div>
-                <div className="simple-stat-label">My Tickets</div>
-              </div>
-              <div className="simple-stat-card">
-                <div className="simple-stat-value">{ticketsLoading ? '—' : stats.resolved}</div>
-                <div className="simple-stat-label">Resolved</div>
-              </div>
-              <div className="simple-stat-card">
-                <div className="simple-stat-value">{ticketsLoading ? '—' : stats.pending}</div>
-                <div className="simple-stat-label">Pending</div>
-              </div>
+              <StatCard loading={false} value={stats.totalAssets} label="My Assets" />
+              <StatCard loading={ticketsLoading} value={stats.myTickets} label="My Tickets" />
+              <StatCard loading={ticketsLoading} value={stats.resolved} label="Resolved" />
+              <StatCard loading={ticketsLoading} value={stats.pending} label="Pending" />
             </div>
           </section>
 
@@ -379,7 +189,9 @@ const UserDashboard = () => {
           <section className="simple-activity-section">
             <h2 className="simple-section-title">Recent Activity</h2>
             <div className="simple-activity-list">
-              {ticketsLoading && <p>Loading activity…</p>}
+              {ticketsLoading && [0, 1, 2].map((key) => (
+                <div key={key} className="simple-activity-item skeleton-row-block" />
+              ))}
               {!ticketsLoading && recentActivity.length === 0 && <p>No recent ticket activity yet.</p>}
               {!ticketsLoading && recentActivity.map((item) => (
                 <div key={item.id} className="simple-activity-item">
@@ -399,8 +211,8 @@ const UserDashboard = () => {
             © 2026. ASM - Asset Management System • Logged in as: {user.email}
           </footer>
         </main>
-      </div>
     </div>
+    </AppLayout>
   );
 };
 

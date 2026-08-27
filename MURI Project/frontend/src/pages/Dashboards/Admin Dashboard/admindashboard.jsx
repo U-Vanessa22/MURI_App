@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { FaLaptop, FaTicketAlt, FaRobot } from 'react-icons/fa';
+import { FaUsers, FaTicketAlt, FaBoxOpen, FaChartBar } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { documentAPI, reportAPI, voucherAPI } from '../../../services/api';
+import { disposalAPI, documentAPI, reportAPI, usersAPI, voucherAPI } from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useThemeMode } from '../../../contexts/ThemeContext';
 import AppLayout from '../../../components/layout/AppLayout';
-import './itdashboard.css';
+import './admindashboard.css';
 
 const DOCUMENT_TYPES = {
   receiving: 'receiving',
@@ -31,18 +31,23 @@ const StatCard = ({ loading, value, label, onClick }) => (
   </div>
 );
 
-const ITDashboard = () => {
+const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { darkMode } = useThemeMode();
   const [notifications, setNotifications] = useState([]);
   const [stats, setStats] = useState({
-    // Real device/asset inventory isn't built yet (Bundle B) — no backend
-    // data exists to show here.
-    totalAssets: 0,
+    totalUsers: 0,
     activeTickets: 0,
     resolved: 0,
     pending: 0,
+  });
+  const [userRoster, setUserRoster] = useState({
+    admins: 0,
+    it: 0,
+    users: 0,
+    active: 0,
+    inactive: 0,
   });
   const [recentActivity, setRecentActivity] = useState([]);
   const [workloadBoard, setWorkloadBoard] = useState([]);
@@ -58,6 +63,7 @@ const ITDashboard = () => {
     pendingSignatures: 0,
     signedReturned: 0,
   });
+  const [disposalCount, setDisposalCount] = useState(0);
   const [dataLoading, setDataLoading] = useState(true);
   const [dataError, setDataError] = useState('');
   const [toastMessage, setToastMessage] = useState('');
@@ -126,10 +132,12 @@ const ITDashboard = () => {
       try {
         setDataError('');
 
-        const [overview, vouchers, documents] = await Promise.all([
+        const [overview, vouchers, users, documents, disposals] = await Promise.all([
           reportAPI.getOverview(),
           voucherAPI.list(),
+          usersAPI.listUsers(),
           documentAPI.list(),
+          disposalAPI.list(),
         ]);
 
         await reportAPI.checkSla();
@@ -137,11 +145,28 @@ const ITDashboard = () => {
 
         setStats((prev) => ({
           ...prev,
+          totalUsers: (users || []).length,
           activeTickets: (overview.open || 0) + (overview.assigned || 0) + (overview.in_progress || 0),
           resolved: overview.resolved || 0,
           pending: overview.open || 0,
         }));
         setWorkloadBoard(overview.workload || []);
+
+        const nextUserRoster = (users || []).reduce(
+          (accumulator, person) => {
+            const role = (person.role || '').toLowerCase();
+            if (role === 'admin') accumulator.admins += 1;
+            else if (role === 'it') accumulator.it += 1;
+            else accumulator.users += 1;
+
+            if (person.is_active) accumulator.active += 1;
+            else accumulator.inactive += 1;
+
+            return accumulator;
+          },
+          { admins: 0, it: 0, users: 0, active: 0, inactive: 0 }
+        );
+        setUserRoster(nextUserRoster);
 
         const nextQueueSnapshot = (vouchers || []).reduce(
           (accumulator, ticket) => {
@@ -177,6 +202,8 @@ const ITDashboard = () => {
           pendingSignatures: pendingSignatures.length,
           signedReturned: signedReturned.length,
         });
+
+        setDisposalCount((disposals || []).length);
 
         const recent = vouchers.slice(0, 8).map((item) => ({
           id: item.id,
@@ -248,7 +275,7 @@ const ITDashboard = () => {
 
   return (
     <AppLayout
-      activePath="/it-dashboard"
+      activePath="/admin-dashboard"
       notifications={notifications}
       onMarkNotificationRead={handleMarkNotificationRead}
       onMarkAllNotificationsRead={handleMarkAllNotificationsRead}
@@ -278,9 +305,9 @@ const ITDashboard = () => {
         <main className="simple-main">
           {/* Welcome Section */}
           <section className="simple-welcome">
-            <h1>Welcome back, {user.full_name || user.username || 'User'}!</h1>
+            <h1>Welcome back, {user.full_name || user.username || 'Admin'}!</h1>
             <div className="welcome-subtitle">
-              <p>Here's what's happening with your assets today.</p>
+              <p>System owner overview — everything happening across MURI, in one place.</p>
               {user.department && user.station && (
                 <div className="user-context">
                   <span className="context-badge">{user.department}</span>
@@ -298,19 +325,32 @@ const ITDashboard = () => {
               </div>
             )}
             <div className="simple-stats-grid">
-              <StatCard loading={dataLoading} value={stats.totalAssets} label="Total Assets" />
-              <StatCard loading={dataLoading} value={stats.activeTickets} label="Active Tickets" />
+              <StatCard loading={dataLoading} value={stats.totalUsers} label="Total Users" onClick={() => navigate('/admin/users')} />
+              <StatCard loading={dataLoading} value={stats.activeTickets} label="Active Tickets" onClick={() => navigate('/voucher')} />
               <StatCard loading={dataLoading} value={stats.resolved} label="Resolved" />
               <StatCard loading={dataLoading} value={stats.pending} label="Pending" />
             </div>
           </section>
 
+          {/* User Roster */}
           <section className="simple-stats-section">
-            <h2 className="simple-section-title">Document Signature Workflow</h2>
+            <h2 className="simple-section-title">User Roster</h2>
+            <div className="simple-stats-grid">
+              <StatCard loading={dataLoading} value={userRoster.admins} label="Admins" />
+              <StatCard loading={dataLoading} value={userRoster.it} label="IT Personnel" />
+              <StatCard loading={dataLoading} value={userRoster.users} label="Users" />
+              <StatCard loading={dataLoading} value={userRoster.active} label="Active Accounts" />
+              <StatCard loading={dataLoading} value={userRoster.inactive} label="Inactive Accounts" />
+            </div>
+          </section>
+
+          <section className="simple-stats-section">
+            <h2 className="simple-section-title">Document & Disposal Workflow</h2>
             <div className="simple-stats-grid">
               <StatCard loading={dataLoading} value={documentQueue.receiving} label="Receiving Documents" onClick={() => navigate('/document')} />
               <StatCard loading={dataLoading} value={documentQueue.pendingSignatures} label="Pending User Signatures" onClick={() => navigate('/document')} />
               <StatCard loading={dataLoading} value={documentQueue.signedReturned} label="Signed and Returned to IT" onClick={() => navigate('/document')} />
+              <StatCard loading={dataLoading} value={disposalCount} label="Disposal Requests" onClick={() => navigate('/disposal')} />
             </div>
           </section>
 
@@ -320,14 +360,26 @@ const ITDashboard = () => {
             <div className="simple-actions-grid">
               <div
                 className="simple-action-card"
+                onClick={() => navigate('/admin/users')}
+                style={{ cursor: 'pointer' }}
+              >
+                <div className="simple-action-icon">
+                  <FaUsers />
+                </div>
+                <h3>Manage Users</h3>
+                <p>Create accounts, reset passwords, activate/deactivate</p>
+              </div>
+
+              <div
+                className="simple-action-card"
                 onClick={() => navigate('/data-assets')}
                 style={{ cursor: 'pointer' }}
               >
                 <div className="simple-action-icon">
-                  <FaLaptop />
+                  <FaBoxOpen />
                 </div>
-                <h3>My Assets</h3>
-                <p>View and manage your assigned assets</p>
+                <h3>Assets</h3>
+                <p>View and manage all tracked assets</p>
               </div>
 
               <div
@@ -338,32 +390,20 @@ const ITDashboard = () => {
                 <div className="simple-action-icon">
                   <FaTicketAlt />
                 </div>
-                <h3>Submit Request</h3>
-                <p>Create a new support ticket</p>
+                <h3>All Tickets</h3>
+                <p>Review every ticket in the system</p>
               </div>
 
               <div
                 className="simple-action-card"
-                onClick={() => navigate('/voucher?filter=my-tickets')}
+                onClick={() => navigate('/report')}
                 style={{ cursor: 'pointer' }}
               >
                 <div className="simple-action-icon">
-                  <FaTicketAlt />
+                  <FaChartBar />
                 </div>
-                <h3>My Tickets</h3>
-                <p>Check your ticket status</p>
-              </div>
-
-              <div
-                className="simple-action-card"
-                onClick={() => navigate('/chatbot')}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="simple-action-icon">
-                  <FaRobot />
-                </div>
-                <h3>AI Chatbot</h3>
-                <p>Get instant help from our AI</p>
+                <h3>Reports</h3>
+                <p>System-wide analytics and SLA health</p>
               </div>
             </div>
           </section>
@@ -402,12 +442,14 @@ const ITDashboard = () => {
               <StatCard loading={dataLoading} value={queueSnapshot.open} label="Open Queue" />
               <StatCard loading={dataLoading} value={queueSnapshot.assigned} label="Assigned Queue" />
               <StatCard loading={dataLoading} value={queueSnapshot.in_progress} label="In Progress Queue" />
+              <StatCard loading={dataLoading} value={queueSnapshot.resolved} label="Resolved Queue" />
+              <StatCard loading={dataLoading} value={queueSnapshot.closed} label="Closed Queue" />
             </div>
           </section>
 
           {/* Recent Activity */}
           <section className="simple-activity-section">
-            <h2 className="simple-section-title">Recent Activity</h2>
+            <h2 className="simple-section-title">Recent System Activity</h2>
             <div className="simple-activity-list">
               {dataLoading && [0, 1, 2].map((key) => (
                 <div key={key} className="simple-activity-item skeleton-row-block" />
@@ -436,4 +478,4 @@ const ITDashboard = () => {
   );
 };
 
-export default ITDashboard;
+export default AdminDashboard;

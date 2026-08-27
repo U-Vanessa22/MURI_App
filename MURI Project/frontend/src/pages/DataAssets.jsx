@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import './dataAssets.css';
-import UnifiedSidebar from '../components/layout/UnifiedSidebar';
+import AppLayout from '../components/layout/AppLayout';
 import { usersAPI } from '../services/api';
 
 const DataAssets = () => {
@@ -199,9 +199,7 @@ const DataAssets = () => {
   );
 
   return (
-    <div className="data-assets-page">
-      <UnifiedSidebar activePath="/data-assets" />
-
+    <AppLayout activePath="/data-assets">
       {/* Main Content */}
       <div className="main-content">
         {/* Header */}
@@ -577,7 +575,6 @@ const DataAssets = () => {
                             onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
                           >
                             <option value="User">User</option>
-                            <option value="Manager">Manager</option>
                             <option value="Admin">Admin</option>
                           </select>
                         </div>
@@ -786,7 +783,7 @@ const DataAssets = () => {
           </div>
         )}
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

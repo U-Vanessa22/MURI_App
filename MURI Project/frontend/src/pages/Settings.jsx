@@ -1,14 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { FaBell, FaEye, FaEyeSlash, FaMoon, FaSun } from 'react-icons/fa';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import './settings.css';
-import UnifiedSidebar from '../components/layout/UnifiedSidebar';
+import AppLayout from '../components/layout/AppLayout';
 import { usersAPI } from '../services/api';
 import { useThemeMode } from '../contexts/ThemeContext';
 
 const Settings = () => {
   const location = useLocation();
-  const { darkMode, setDarkMode } = useThemeMode();
+  const { darkMode } = useThemeMode();
 
   const [currentRole, setCurrentRole] = useState('');
   const [accountInfo, setAccountInfo] = useState({
@@ -76,11 +76,8 @@ const Settings = () => {
     });
   }, []);
 
-  const isITRole = useMemo(() => ['admin', 'manager', 'it'].includes(currentRole), [currentRole]);
+  const isITRole = useMemo(() => ['admin', 'it'].includes(currentRole), [currentRole]);
   const canGrantAccess = isITRole;
-  const userLabel = accountInfo.username || accountInfo.email || 'User';
-  const userRoleLabel = (currentRole || 'user').toUpperCase();
-  const userInitial = (userLabel || 'U').charAt(0).toUpperCase();
 
   const clearStatusAfterDelay = () => {
     setTimeout(() => setStatusMessage({ text: '', type: '' }), 3000);
@@ -239,32 +236,11 @@ const Settings = () => {
   }
 
   return (
-    <div className={`setting-container ${darkMode ? 'dark' : ''}`}>
-      <UnifiedSidebar activePath={isITSettingsPage ? '/settings/it' : '/settings'} />
-
+    <AppLayout activePath={isITSettingsPage ? '/settings/it' : '/settings'}>
+      <div className={`setting-container ${darkMode ? 'dark' : ''}`}>
       <div className="setting-main">
         <div className="setting-header">
           <h1 className="setting-title">{isITRole ? 'IT Settings' : 'Settings'}</h1>
-          <div className="setting-header-right">
-            <button className="setting-icon-btn" type="button" title="Notifications">
-              <FaBell />
-            </button>
-            <button
-              className="setting-icon-btn"
-              type="button"
-              title="Toggle dark mode"
-              onClick={() => setDarkMode(!darkMode)}
-            >
-              {darkMode ? <FaSun /> : <FaMoon />}
-            </button>
-            <div className="setting-header-user">
-              <div className="setting-user-avatar">{userInitial}</div>
-              <div className="setting-user-meta">
-                <div className="setting-user-name">{accountInfo.email}</div>
-                <div className="setting-user-role">{userRoleLabel}</div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {statusMessage.text && <div className={`status-message ${statusMessage.type}`}>{statusMessage.text}</div>}
@@ -615,6 +591,7 @@ const Settings = () => {
         </div>
       </div>
     </div>
+    </AppLayout>
   );
 };
 

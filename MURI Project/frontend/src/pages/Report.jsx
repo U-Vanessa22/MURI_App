@@ -5,7 +5,7 @@ import {
   Calendar
 } from 'lucide-react';
 import './report.css';
-import UnifiedSidebar from '../components/layout/UnifiedSidebar';
+import AppLayout from '../components/layout/AppLayout';
 import { reportAPI, voucherAPI } from '../services/api';
 import { useThemeMode } from '../contexts/ThemeContext';
 
@@ -15,7 +15,7 @@ export default function ReportPage() {
   const [overview, setOverview] = useState(null);
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { darkMode, toggleDarkMode } = useThemeMode();
+  const { darkMode } = useThemeMode();
 
   const getPeriodStart = (period) => {
     const now = new Date();
@@ -185,22 +185,12 @@ export default function ReportPage() {
   };
 
   return (
-    <div className={`report-container ${darkMode ? 'dark' : ''}`}>
-      <UnifiedSidebar activePath="/report" />
-
+    <AppLayout activePath="/report">
+      <div className={`report-container ${darkMode ? 'dark' : ''}`}>
       {/* Main Content */}
       <main className="main-content">
         <header className="top-bar">
           <h1 className="page-title">Reports & Analytics</h1>
-          <div className="header-actions">
-            <button className="icon-btn" onClick={toggleDarkMode} title="Toggle dark mode" type="button">
-              {darkMode ? '☀️' : '🌙'}
-            </button>
-            <button className="icon-btn">
-              🔔
-            </button>
-            <div className="user-avatar">U</div>
-          </div>
         </header>
 
         <div className="content-wrapper">
@@ -436,6 +426,7 @@ export default function ReportPage() {
           <p>© 2024 ASM. All rights reserved.</p>
         </footer>
       </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 }

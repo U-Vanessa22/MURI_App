@@ -108,7 +108,6 @@ body.asm-dark .setting-header,
 body.asm-dark .chatbot-container .top-bar,
 body.asm-dark .report-container .top-bar,
 body.asm-dark .voucher-form-container,
-body.asm-dark .voucher-ticket-card,
 body.asm-dark .voucher-requester-card,
 body.asm-dark .voucher-tabs,
 body.asm-dark .setting-section,
@@ -128,8 +127,6 @@ body.asm-dark .report-container .footer {
 body.asm-dark .voucher-form-group input,
 body.asm-dark .voucher-form-group select,
 body.asm-dark .voucher-form-group textarea,
-body.asm-dark .voucher-ticket-select,
-body.asm-dark .voucher-ticket-textarea,
 body.asm-dark .voucher-search-input,
 body.asm-dark .form-input,
 body.asm-dark .chatbot-container .chat-input,
@@ -151,11 +148,7 @@ body.asm-dark .chatbot-container .empty-chat-text,
 body.asm-dark .report-container .page-title,
 body.asm-dark .report-container .chart-title,
 body.asm-dark .report-container .activity-title,
-body.asm-dark .report-container .stat-value,
-body.asm-dark .voucher-ticket-card h4,
-body.asm-dark .voucher-ticket-label,
-body.asm-dark .voucher-status-badge,
-body.asm-dark .ticket-priority-badge {
+body.asm-dark .report-container .stat-value {
   color: #e5e7eb;
 }
 
@@ -166,7 +159,6 @@ body.asm-dark .user-email,
 body.asm-dark .chatbot-container .faq-solution,
 body.asm-dark .chatbot-container .empty-chat-subtitle,
 body.asm-dark .chatbot-container .message-bubble-bot,
-body.asm-dark .voucher-ticket-card p,
 body.asm-dark .report-container .chart-subtitle,
 body.asm-dark .report-container .stat-label,
 body.asm-dark .report-container .stat-trend,
@@ -175,7 +167,6 @@ body.asm-dark .report-container .activity-table td span {
   color: #9ca3af;
 }
 
-body.asm-dark .voucher-ticket-card,
 body.asm-dark .chatbot-container .faq-item,
 body.asm-dark .chatbot-container .chat-input-form,
 body.asm-dark .chatbot-container .message-bubble-bot,

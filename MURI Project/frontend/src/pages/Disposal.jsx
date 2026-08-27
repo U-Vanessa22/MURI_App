@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './disposal.css';
 import { useAuth } from '../contexts/AuthContext'; 
-import UnifiedSidebar from '../components/layout/UnifiedSidebar';
+import AppLayout from '../components/layout/AppLayout';
 import { disposalAPI } from '../services/api';
 
 const Disposal = () => {
@@ -280,9 +280,7 @@ const Disposal = () => {
   const totalItemsPendingSubmission = queuedItems.length + (disposalReason && formData.deviceName && formData.serialNumber ? 1 : 0);
 
   return (
-    <div className="disposal-page">
-      <UnifiedSidebar activePath="/disposal" />
-
+    <AppLayout activePath="/disposal">
       {/* Main Content */}
       <div className="main-content">
         {/* Header */}
@@ -852,7 +850,7 @@ const Disposal = () => {
           </div>
         </div> */}
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

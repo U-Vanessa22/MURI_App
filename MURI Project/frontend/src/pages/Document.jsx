@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';  // ✅ Both hooks imported
 import './document.css';
 import { useAuth } from '../contexts/AuthContext';
-import UnifiedSidebar from '../components/layout/UnifiedSidebar';
+import AppLayout from '../components/layout/AppLayout';
 import { documentAPI } from '../services/api';
 
 const DOCUMENT_TYPES = {
@@ -22,7 +22,7 @@ const Document = () => {
   const { user } = useAuth();
   const normalizedRole = (user?.role || '').toLowerCase();
   const canApproveDocuments = normalizedRole === 'it';
-  const canManageDocuments = ['admin', 'manager', 'it'].includes(normalizedRole);
+  const canManageDocuments = ['admin', 'it'].includes(normalizedRole);
   const [activeTab, setActiveTab] = useState('new'); // 'new', 'drafts', 'submitted'
   const [itQueueFilter, setItQueueFilter] = useState('all');
   const [formData, setFormData] = useState({
@@ -427,9 +427,7 @@ const Document = () => {
       : 'My Receiving Documents';
 
   return (
-    <div className="document-page">
-      <UnifiedSidebar activePath="/document" />
-
+    <AppLayout activePath="/document">
       {/* Main Content */}
       <div className="main-content">
         {/* Header */}
@@ -1180,7 +1178,7 @@ const Document = () => {
           <p className="footer-version">Version 1.0.0</p>
         </footer>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

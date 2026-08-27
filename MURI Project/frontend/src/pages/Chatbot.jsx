@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
-import { Bot, Bell, User, Send } from 'lucide-react';
+import { Bot, Send } from 'lucide-react';
 import './chatbot.css';
-import UnifiedSidebar from '../components/layout/UnifiedSidebar';
+import AppLayout from '../components/layout/AppLayout';
 import { chatbotAPI } from '../services/api';
-import { useThemeMode } from '../contexts/ThemeContext';
 
 export default function ChatbotPage() {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [draftReply, setDraftReply] = useState('');
-  const { darkMode, toggleDarkMode } = useThemeMode();
 
   const faqItems = [
     {
@@ -73,24 +71,11 @@ export default function ChatbotPage() {
   };
 
   return (
-    <div className="chatbot-container">
-      <UnifiedSidebar activePath="/chatbot" />
-
+    <AppLayout activePath="/chatbot">
       {/* Main Content */}
       <main className="main-content">
         <header className="top-bar">
           <h1 className="page-title">Chatbot</h1>
-          <div className="header-actions">
-            <button className="icon-btn" type="button" title="Toggle dark mode" onClick={toggleDarkMode}>
-              {darkMode ? '☀️' : '🌙'}
-            </button>
-            <button className="icon-btn">
-              <Bell size={20} />
-            </button>
-            <button className="icon-btn">
-              <User size={20} />
-            </button>
-          </div>
         </header>
 
         <div className="content-wrapper">
@@ -180,6 +165,6 @@ export default function ChatbotPage() {
           <p>©2026. MURI</p>
         </footer>
       </main>
-    </div>
+    </AppLayout>
   );
 }

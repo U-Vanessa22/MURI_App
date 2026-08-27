@@ -28,16 +28,20 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // A 401 from the login/register endpoints themselves just means "wrong
+    // credentials" — that's handled inline by the login form, not a session
+    // expiry, so it must not trigger the hard-redirect below.
+    const isAuthEndpoint = /\/auth\/(login|register)$/.test(originalRequest?.url || '');
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       originalRequest._retry = true;
-      
+
       // Try to refresh token or redirect to login
       localStorage.removeItem('access_token');
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
-    
+
     return Promise.reject(error);
   }
 );
@@ -152,6 +156,16 @@ export const usersAPI = {
 
   updateUserStatus: async (userId, isActive) => {
     const response = await api.patch(`/users/${userId}/status`, { is_active: isActive });
+    return response.data;
+  },
+
+  updateUser: async (userId, payload) => {
+    const response = await api.patch(`/users/${userId}`, payload);
+    return response.data;
+  },
+
+  deleteUser: async (userId) => {
+    const response = await api.delete(`/users/${userId}`);
     return response.data;
   },
 

@@ -10,31 +10,40 @@ import {
   FaHeadset,
   FaFileContract,
   FaSignOutAlt,
+  FaUsers,
+  FaUserCircle,
 } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 import './unifiedSidebar.css';
 
-const UnifiedSidebar = ({ activePath }) => {
+const DASHBOARD_PATHS = ['/user-dashboard', '/it-dashboard', '/admin-dashboard', '/virtual-dashboard'];
+
+const UnifiedSidebar = ({ activePath, collapsed = false }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
 
   const role = (user?.role || '').toLowerCase();
-  const isIT = ['admin', 'manager', 'it'].includes(role);
+  const isAdmin = role === 'admin';
+  const isIT = role === 'it';
+  const isVirtual = role === 'virtual';
 
   useEffect(() => {
-    if (location.pathname === '/user-dashboard' || location.pathname === '/it-dashboard') {
+    if (DASHBOARD_PATHS.includes(location.pathname)) {
       localStorage.setItem('asm_home_dashboard', location.pathname);
     }
   }, [location.pathname]);
 
   const dashboardPath = useMemo(() => {
     const savedDashboard = localStorage.getItem('asm_home_dashboard');
-    if (savedDashboard === '/user-dashboard' || savedDashboard === '/it-dashboard') {
+    if (DASHBOARD_PATHS.includes(savedDashboard)) {
       return savedDashboard;
     }
-    return isIT ? '/it-dashboard' : '/user-dashboard';
-  }, [isIT]);
+    if (isAdmin) return '/admin-dashboard';
+    if (isIT) return '/it-dashboard';
+    if (isVirtual) return '/virtual-dashboard';
+    return '/user-dashboard';
+  }, [isAdmin, isIT, isVirtual]);
 
   const userItems = [
     { name: 'Dashboard', icon: FaHome, path: dashboardPath },
@@ -56,7 +65,28 @@ const UnifiedSidebar = ({ activePath }) => {
     { name: 'Settings', icon: FaCog, path: '/settings/it' },
   ];
 
-  const items = isIT ? itItems : userItems;
+  const adminItems = [
+    { name: 'Dashboard', icon: FaHome, path: dashboardPath },
+    { name: 'Ticket', icon: FaTicketAlt, path: '/voucher' },
+    { name: 'Users', icon: FaUsers, path: '/admin/users' },
+    { name: 'Chatbot', icon: FaRobot, path: '/chatbot' },
+    { name: 'Disposal', icon: FaHeadset, path: '/disposal' },
+    { name: 'Report', icon: FaChartBar, path: '/report' },
+    { name: 'Document', icon: FaFileContract, path: '/document' },
+    { name: 'Asset', icon: FaBoxOpen, path: '/data-assets' },
+    { name: 'Settings', icon: FaCog, path: '/settings/it' },
+  ];
+
+  const virtualItems = [
+    { name: 'Dashboard', icon: FaHome, path: dashboardPath },
+    { name: 'Ticket', icon: FaTicketAlt, path: '/voucher' },
+    { name: 'Chatbot', icon: FaRobot, path: '/chatbot' },
+    { name: 'Report', icon: FaChartBar, path: '/report' },
+    { name: 'Document', icon: FaFileContract, path: '/document' },
+    { name: 'Settings', icon: FaCog, path: '/settings' },
+  ];
+
+  const items = isAdmin ? adminItems : isIT ? itItems : isVirtual ? virtualItems : userItems;
 
   const isActive = (path) => {
     if (activePath) return activePath === path;
@@ -73,27 +103,17 @@ const UnifiedSidebar = ({ activePath }) => {
   };
 
   return (
-    <aside className="sidebar-compact unified-sidebar">
-      <div className="sidebar-header">
-        <img
-          src="/Logo.png"
-          alt="MURI Logo"
-          className="sidebar-logo-image"
-          onError={(e) => {
-            e.currentTarget.style.display = 'none';
-          }}
-        />
-      </div>
-
-      <nav className="sidebar-nav">
+    <aside className={`app-sidebar ${collapsed ? 'collapsed' : ''}`}>
+      <nav className="app-sidebar-nav">
         {items.map((item) => {
           const Icon = item.icon;
           return (
             <button
               type="button"
               key={item.path}
-              className={`sidebar-item ${isActive(item.path) ? 'active' : ''}`}
+              className={`app-sidebar-item ${isActive(item.path) ? 'active' : ''}`}
               onClick={() => navigate(item.path)}
+              title={collapsed ? item.name : undefined}
             >
               <span className="icon"><Icon /></span>
               <span className="text">{item.name}</span>
@@ -102,15 +122,15 @@ const UnifiedSidebar = ({ activePath }) => {
         })}
       </nav>
 
-      <div className="sidebar-footer">
+      <div className="app-sidebar-footer">
         <div className="user-info">
-          <span className="user-avatar">👤</span>
+          <span className="user-avatar"><FaUserCircle /></span>
           <div className="user-details">
             <span className="user-name">{user?.full_name || user?.username || 'User'}</span>
             <span className="user-email">{user?.email || 'No email'}</span>
           </div>
         </div>
-        <button onClick={handleLogout} className="signout-btn" type="button">
+        <button onClick={handleLogout} className="signout-btn" type="button" title={collapsed ? 'Sign Out' : undefined}>
           <span className="icon"><FaSignOutAlt /></span>
           <span className="text">Sign Out</span>
         </button>

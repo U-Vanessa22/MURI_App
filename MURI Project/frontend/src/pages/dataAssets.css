@@ -1,198 +1,7 @@
 /* DataAssets.css */
-.data-assets-page {
-  display: flex;
-  min-height: 100vh;
-  background-color: #f5f7fa;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-}
-
-/* Sidebar Styles */
-.sidebar-compact {
-  width: 60px;
-  min-height: 100vh;
-  background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
-  transition: all 0.3s ease;
-  position: fixed;
-  left: 0;
-  top: 0;
-  overflow: hidden;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.sidebar-compact:hover {
-  width: 220px;
-}
-
-.sidebar-header {
-  padding: 20px 15px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border-bottom: 1px solid #34495e;
-  min-height: 80px;
-}
-
-.logo-compact {
-  font-size: 28px;
-  min-width: 30px;
-  text-align: center;
-  color: #0C5494;
-  transition: transform 0.3s ease;
-}
-
-.logo-text {
-  font-size: 18px;
-  font-weight: 600;
-  color: #0C5494;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  white-space: nowrap;
-}
-
-.sidebar-compact:hover .logo-text {
-  opacity: 1;
-}
-
-.sidebar-nav {
-  flex: 1;
-  padding: 20px 0;
-}
-
-.sidebar-item {
-  display: flex;
-  align-items: center;
-  padding: 12px 15px;
-  color: #ecf0f1;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  margin: 5px 10px;
-  border-radius: 8px;
-}
-
-.sidebar-item:hover {
-  background: #34495e;
-  transform: translateX(5px);
-}
-
-.sidebar-item.active {
-  background: #0C5494;
-  box-shadow: 0 4px 10px rgba(12, 84, 148, 0.3);
-}
-
-.sidebar-item .icon {
-  font-size: 20px;
-  min-width: 30px;
-  text-align: center;
-  transition: transform 0.2s ease;
-}
-
-.sidebar-item:hover .icon {
-  transform: scale(1.1);
-}
-
-.sidebar-item .text {
-  opacity: 0;
-  margin-left: 12px;
-  font-size: 14px;
-  font-weight: 500;
-  transition: opacity 0.3s ease;
-}
-
-.sidebar-compact:hover .sidebar-item .text {
-  opacity: 1;
-}
-
-.sidebar-footer {
-  padding: 20px 15px;
-  border-top: 1px solid #34495e;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  color: #ecf0f1;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  margin-bottom: 15px;
-}
-
-.sidebar-compact:hover .user-info {
-  opacity: 1;
-}
-
-.user-avatar {
-  font-size: 20px;
-  min-width: 30px;
-  text-align: center;
-}
-
-.user-details {
-  margin-left: 10px;
-  overflow: hidden;
-}
-
-.user-name {
-  font-size: 14px;
-  font-weight: 500;
-  display: block;
-  white-space: nowrap;
-}
-
-.user-email {
-  font-size: 12px;
-  color: #bdc3c7;
-  display: block;
-  white-space: nowrap;
-}
-
-.signout-btn {
-  width: 100%;
-  padding: 10px 12px;
-  background: rgba(231, 76, 60, 0.1);
-  border: none;
-  border-radius: 8px;
-  color: #e74c3c;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  opacity: 0;
-}
-
-.sidebar-compact:hover .signout-btn {
-  opacity: 1;
-}
-
-.signout-btn:hover {
-  background: #e74c3c;
-  color: white;
-}
-
-.signout-btn .icon {
-  font-size: 16px;
-  min-width: 30px;
-  text-align: center;
-}
-
-.signout-btn .text {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-/* Main Content */
 .main-content {
-  flex: 1;
-  margin-left: 60px;
   padding: 30px;
-  transition: margin-left 0.3s ease;
-}
-
-.sidebar-compact:hover ~ .main-content {
-  margin-left: 220px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
 }
 
 /* Header */
@@ -441,11 +250,6 @@
 .role-admin {
   background: #e3f2fd;
   color: #1976d2;
-}
-
-.role-manager {
-  background: #e8f5e9;
-  color: #388e3c;
 }
 
 .role-user {
@@ -839,14 +643,9 @@
 
 @media (max-width: 768px) {
   .main-content {
-    margin-left: 0;
     padding: 20px;
   }
-  
-  .sidebar-compact:hover ~ .main-content {
-    margin-left: 0;
-  }
-  
+
   .tabs {
     flex-direction: column;
   }
