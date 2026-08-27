@@ -1,8 +1,8 @@
 .unified-sidebar {
-  width: 60px;
+  box-sizing: border-box;
+  width: 252px;
   min-height: 100vh;
   background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
-  transition: all 0.3s ease;
   position: fixed;
   left: 0;
   top: 0;
@@ -10,172 +10,123 @@
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  padding: 18px 12px 14px;
+  box-shadow: 2px 0 16px rgba(15, 35, 53, 0.16);
 }
 
-.unified-sidebar:hover {
-  width: 220px;
-}
-
-.unified-sidebar .sidebar-header {
-  padding: 16px 12px;
+.unified-sidebar-brand {
   display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 8px 20px;
+  color: #ffffff;
+}
+
+.unified-sidebar-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #ffffff;
+  object-fit: contain;
+  padding: 3px;
+}
+
+.unified-sidebar-brand strong,
+.unified-sidebar-brand span {
+  display: block;
+}
+
+.unified-sidebar-brand strong {
+  font-size: 16px;
+  letter-spacing: 0.02em;
+}
+
+.unified-sidebar-brand span {
+  margin-top: 2px;
+  color: #9cb3c6;
+  font-size: 11px;
+}
+
+.unified-sidebar-nav {
+  display: grid;
+  gap: 4px;
+}
+
+.unified-sidebar-item {
+  display: flex;
+  width: 100%;
   align-items: center;
   gap: 12px;
-  border-bottom: 1px solid #34495e;
-  min-height: 72px;
-}
-
-.unified-sidebar .sidebar-logo-image {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-  border-radius: 6px;
-  background: #fff;
-  padding: 2px;
-}
-
-.unified-sidebar .logo-text {
-  font-size: 18px;
-  font-weight: 600;
-  color: #0C5494;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  white-space: nowrap;
-}
-
-.unified-sidebar:hover .logo-text {
-  opacity: 1;
-}
-
-.unified-sidebar .sidebar-nav {
-  flex: 1;
-  padding: 16px 0;
-}
-
-.unified-sidebar .sidebar-item {
-  width: calc(100% - 20px);
-  margin: 5px 10px;
-  display: flex;
-  align-items: center;
-  padding: 12px 15px;
-  color: #ecf0f1;
+  border: 0;
+  border-radius: 9px;
   background: transparent;
-  border: none;
-  border-radius: 8px;
+  color: #c2d0dc;
   cursor: pointer;
-  transition: all 0.2s ease;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 11px 12px;
   text-align: left;
-  white-space: nowrap;
+  transition: background 0.16s ease, color 0.16s ease;
 }
 
-.unified-sidebar .sidebar-item:hover {
-  background: #34495e;
-  transform: translateX(5px);
+.unified-sidebar-item svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
 }
 
-.unified-sidebar .sidebar-item.active {
-  background: #0C5494;
-  box-shadow: 0 4px 10px rgba(12, 84, 148, 0.3);
+.unified-sidebar-item:hover,
+.unified-sidebar-item.active {
+  background: #0c5494;
+  color: #ffffff;
 }
 
-.unified-sidebar .sidebar-item .icon {
-  font-size: 18px;
-  min-width: 30px;
-  text-align: center;
-  display: inline-flex;
-  justify-content: center;
+.unified-sidebar-footer {
+  display: grid;
+  gap: 5px;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.13);
 }
 
-.unified-sidebar .sidebar-item .text {
-  opacity: 0;
-  margin-left: 12px;
-  font-size: 14px;
-  font-weight: 500;
-  transition: opacity 0.3s ease;
-}
-
-.unified-sidebar:hover .sidebar-item .text {
-  opacity: 1;
-}
-
-.unified-sidebar .sidebar-footer {
-  padding: 16px 12px;
-  border-top: 1px solid #34495e;
-}
-
-.unified-sidebar .user-info {
+.unified-sidebar-user {
   display: flex;
+  min-width: 0;
   align-items: center;
-  color: #ecf0f1;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  margin-bottom: 12px;
+  gap: 10px;
+  color: #c2d0dc;
+  font-size: 13px;
+  padding: 7px 10px;
 }
 
-.unified-sidebar:hover .user-info {
-  opacity: 1;
-}
-
-.unified-sidebar .user-avatar {
-  font-size: 20px;
-  min-width: 30px;
-  text-align: center;
-}
-
-.unified-sidebar .user-details {
-  margin-left: 10px;
+.unified-sidebar-user > span:last-child {
   overflow: hidden;
-}
-
-.unified-sidebar .user-name {
-  font-size: 14px;
-  font-weight: 500;
-  display: block;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.unified-sidebar .user-email {
-  font-size: 12px;
-  color: #bdc3c7;
-  display: block;
-  white-space: nowrap;
-}
-
-.unified-sidebar .signout-btn {
-  width: 100%;
-  padding: 10px 12px;
-  background: rgba(231, 76, 60, 0.1);
-  border: none;
-  border-radius: 8px;
-  color: #e74c3c;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  opacity: 0;
-}
-
-.unified-sidebar:hover .signout-btn {
-  opacity: 1;
-}
-
-.unified-sidebar .signout-btn:hover {
-  background: #e74c3c;
-  color: #fff;
-}
-
-.unified-sidebar .signout-btn .icon {
-  font-size: 16px;
-  min-width: 30px;
-  text-align: center;
+.unified-sidebar-avatar {
   display: inline-flex;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  align-items: center;
   justify-content: center;
+  border-radius: 50%;
+  background: #0c5494;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
 }
 
-.unified-sidebar .signout-btn .text {
-  font-size: 14px;
-  font-weight: 500;
+.unified-sidebar-signout {
+  color: #f4bdc3;
+}
+
+.unified-sidebar-signout:hover {
+  background: rgba(219, 73, 91, 0.2);
+  color: #ffffff;
 }
 
 .data-assets-page .main-content,
@@ -183,14 +134,24 @@
 .document-page .main-content,
 .report-container .main-content,
 .chatbot-container .main-content,
+.asset-issuance-page .main-content,
 .voucher-container .voucher-main,
-.setting-container .setting-main {
-  margin-left: 60px;
-  transition: margin-left 0.3s ease;
+.setting-container .setting-main,
+.simple-dashboard-root .simple-header,
+.simple-dashboard-root .simple-container {
+  margin-left: 252px;
 }
 
-.unified-sidebar:hover ~ .main-content,
-.unified-sidebar:hover ~ .voucher-main,
-.unified-sidebar:hover ~ .setting-main {
-  margin-left: 220px;
+@media (max-width: 768px) {
+  .data-assets-page .main-content,
+  .disposal-page .main-content,
+  .document-page .main-content,
+  .report-container .main-content,
+  .chatbot-container .main-content,
+  .voucher-container .voucher-main,
+  .setting-container .setting-main,
+  .simple-dashboard-root .simple-header,
+  .simple-dashboard-root .simple-container {
+    margin-left: 0;
+  }
 }
