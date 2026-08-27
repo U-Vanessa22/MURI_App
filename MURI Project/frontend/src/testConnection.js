@@ -4,7 +4,7 @@ async function testBackendConnection() {
     const response = await fetch('http://localhost:8000/health');
     const data = await response.json();
     
-    console.log('✅ Backend is running:', data);
+    console.log('Backend is running:', data);
     
     // Test auth endpoints
     const testUser = {
@@ -19,9 +19,9 @@ async function testBackendConnection() {
     });
     
     if (loginResponse.ok) {
-      console.log('✅ Auth endpoint is working');
+      console.log('Auth endpoint is working');
     } else {
-      console.log('⚠️  Auth endpoint returned:', loginResponse.status);
+      console.log('Auth endpoint returned:', loginResponse.status);
     }
     
   } catch (error) {
