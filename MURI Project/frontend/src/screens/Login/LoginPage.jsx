@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { dashboardPathForRole } from '../../utils/roles';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -43,19 +44,8 @@ const LoginPage = () => {
       const result = await login(email, password);
       
       if (result.success) {
-        // Get user role from response
-        const userRole = (result.data?.user?.role || 'user').toLowerCase();
-        
-        // Redirect based on role
-        if (userRole === 'admin') {
-          navigate('/admin-dashboard');
-        } else if (userRole === 'manager' || userRole === 'it') {
-          navigate('/it-dashboard');
-        } else if (userRole === 'voucher') {
-          navigate('/voucher-dashboard');
-        } else {
-          navigate('/user-dashboard');
-        }
+        const role = result.data?.user?.role;
+        navigate(dashboardPathForRole(role));
       } else {
         setError(result.error || 'Login failed');
       }

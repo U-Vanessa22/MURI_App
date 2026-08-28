@@ -2,13 +2,8 @@
 import React, { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-
-const dashboardPathForRole = (role: string) => {
-  if (role === 'admin') return '/admin-dashboard';
-  if (role === 'manager' || role === 'it') return '/it-dashboard';
-  if (role === 'voucher') return '/voucher-dashboard';
-  return '/user-dashboard';
-};
+import { dashboardPathForRole } from '../utils/roles';
+import MuriLoader from './common/MuriLoader';
 
 /**
  * Inverse of ProtectedRoute: keeps an already-logged-in user off the login
@@ -19,12 +14,11 @@ const GuestRoute: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, loading }: any = useAuth();
 
   if (loading) {
-    return null;
+    return <MuriLoader label="Loading…" />;
   }
 
   if (user) {
-    const role = (user.role || '').toLowerCase();
-    return <Navigate to={dashboardPathForRole(role)} replace />;
+    return <Navigate to={dashboardPathForRole(user.role)} replace />;
   }
 
   return <>{children}</>;

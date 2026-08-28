@@ -4,6 +4,7 @@ import type { AppProps } from 'next/app';
 // this just moves the import statements, no className/JSX logic changed.
 import '../tailwind.css';
 import '../styles/global.css';
+import '../components/common/MuriLoader.css';
 import '../components/layout/unifiedSidebar.css';
 import '../components/layout/topNavbar.css';
 import '../components/common/InteractiveHoverButton.css';

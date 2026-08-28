@@ -2,6 +2,8 @@
 import React, { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { dashboardPathForRole } from '../utils/roles';
+import MuriLoader from './common/MuriLoader';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -16,7 +18,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const location = useLocation();
 
   if (loading) {
-    return null;
+    return <MuriLoader label="Checking your session…" />;
   }
 
   if (!user) {
@@ -24,16 +26,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   if (!hasAccess(requiredRoles)) {
-    const role = (user.role || '').toLowerCase();
-    if (role === 'admin') {
-      return <Navigate to="/admin-dashboard" replace />;
-    } else if (role === 'manager' || role === 'it') {
-      return <Navigate to="/it-dashboard" replace />;
-    } else if (role === 'voucher') {
-      return <Navigate to="/voucher-dashboard" replace />;
-    } else {
-      return <Navigate to="/user-dashboard" replace />;
-    }
+    return <Navigate to={dashboardPathForRole(user.role)} replace />;
   }
 
   return <>{children}</>;

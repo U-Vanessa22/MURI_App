@@ -33,8 +33,14 @@ export const AuthProvider = ({ children }) => {
               localStorage.setItem('user', JSON.stringify(response));
             }
           })
-          .catch(() => {
-            logout();
+          .catch(err => {
+            // Only a real 401 means the stored token is genuinely invalid or
+            // expired -> sign out. Anything else (backend down, 5xx, timeout,
+            // CORS) is transient; keep the cached session so a blip on refresh
+            // doesn't dump the user on the login page.
+            if (err?.response?.status === 401) {
+              logout();
+            }
           })
           .finally(() => {
             setLoading(false);
