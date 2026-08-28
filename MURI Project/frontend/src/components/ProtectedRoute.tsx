@@ -26,7 +26,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   if (!hasAccess(requiredRoles)) {
-    return <Navigate to={dashboardPathForRole(user.role)} replace />;
+    const target = dashboardPathForRole(user.role);
+    // If the role's own dashboard is this same route (e.g. an unrecognized
+    // role falling back to /user-dashboard, which itself requires 'user'),
+    // redirecting again would loop forever. Let them through instead.
+    if (target !== location.pathname) {
+      return <Navigate to={target} replace />;
+    }
   }
 
   return <>{children}</>;

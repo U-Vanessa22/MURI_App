@@ -60,6 +60,10 @@ export const AuthProvider = ({ children }) => {
             setLoading(false);
           });
       } catch (err) {
+        // Stored user JSON is corrupted -> clear the broken session instead of
+        // leaving the app in a half-logged-in state.
+        authAPI.logout();
+        setUser(null);
         setLoading(false);
       }
     } else {
