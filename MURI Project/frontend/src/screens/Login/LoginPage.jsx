@@ -6,6 +6,10 @@ import { dashboardPathForRole } from '../../utils/roles';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// The backend only accepts organization accounts; check it here too so the
+// user gets a clear message instead of a round-trip rejection.
+const ORG_DOMAIN = '@icttoolsasm.com';
+
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -24,6 +28,11 @@ const LoginPage = () => {
     // Validation
     if (!emailRegex.test(email)) {
       setError('Please enter a valid email address');
+      return;
+    }
+
+    if (!email.toLowerCase().endsWith(ORG_DOMAIN)) {
+      setError(`Use your organization email (${ORG_DOMAIN})`);
       return;
     }
 
