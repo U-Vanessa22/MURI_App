@@ -29,8 +29,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       return <Navigate to="/admin-dashboard" replace />;
     } else if (role === 'manager' || role === 'it') {
       return <Navigate to="/it-dashboard" replace />;
-    } else if (role === 'virtual') {
-      return <Navigate to="/virtual-dashboard" replace />;
+    } else if (role === 'voucher') {
+      return <Navigate to="/voucher-dashboard" replace />;
     } else {
       return <Navigate to="/user-dashboard" replace />;
     }

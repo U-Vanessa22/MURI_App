@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.session import engine, Base
 from app.db.migrations import run_startup_migrations
-from app.models import user, voucher, document, disposal, sla_config, notification
-from app.api.routes import users, auth, vouchers, reports, documents, disposal as disposal_routes, chatbot
+from app.models import user, voucher, document, disposal, sla_config, notification, asset, asset_voucher
+from app.api.routes import users, auth, vouchers, reports, documents, disposal as disposal_routes, chatbot, assets, asset_vouchers
 from app.core.config import settings
 from fastapi import Response
 
@@ -33,6 +33,8 @@ app.include_router(reports.router, prefix="/reports", tags=["Reports"])
 app.include_router(documents.router, prefix="/documents", tags=["Documents"])
 app.include_router(disposal_routes.router, prefix="/disposal", tags=["Disposal"])
 app.include_router(chatbot.router, prefix="/chatbot", tags=["Chatbot"])
+app.include_router(assets.router, prefix="/assets", tags=["Assets"])
+app.include_router(asset_vouchers.router, prefix="/asset-vouchers", tags=["Asset Vouchers"])
 
 # STEP 4: Test route
 @app.get("/")

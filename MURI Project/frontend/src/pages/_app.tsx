@@ -19,7 +19,7 @@ import '../screens/voucherpage.css';
 import '../screens/Dashboards/IT Dashboard/itdashboard.css';
 import '../screens/Dashboards/dashboardConsistency.css';
 import '../screens/Dashboards/Admin Dashboard/admindashboard.css';
-import '../screens/Dashboards/Virtual Dashboard/virtualdashboard.css';
+import '../screens/Dashboards/Voucher Dashboard/voucherdashboard.css';
 import '../screens/settings.css';
 import '../screens/adminUsers.css';
 

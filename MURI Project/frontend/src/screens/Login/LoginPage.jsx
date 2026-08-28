@@ -51,8 +51,8 @@ const LoginPage = () => {
           navigate('/admin-dashboard');
         } else if (userRole === 'manager' || userRole === 'it') {
           navigate('/it-dashboard');
-        } else if (userRole === 'virtual') {
-          navigate('/virtual-dashboard');
+        } else if (userRole === 'voucher') {
+          navigate('/voucher-dashboard');
         } else {
           navigate('/user-dashboard');
         }

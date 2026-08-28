@@ -1,13 +1,13 @@
-/* Virtual Dashboard: loading-skeleton state for StatCard, plus the same
+/* Voucher Dashboard: loading-skeleton state for StatCard, plus the same
    accent as the admin dashboard on top of the shared "simple-*" dashboard
    styling in dashboardConsistency.css and itdashboard.css. */
 
-.virtual-dashboard {
+.voucher-dashboard {
   --success: #10b981;
   --success-light: #d1fae5;
 }
 
-.virtual-dashboard .simple-action-icon {
+.voucher-dashboard .simple-action-icon {
   background: linear-gradient(135deg, #0C5494 0%, #1E4620 100%);
 }
 

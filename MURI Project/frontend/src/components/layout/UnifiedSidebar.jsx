@@ -15,7 +15,7 @@ import {
 } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 
-const DASHBOARD_PATHS = ['/user-dashboard', '/it-dashboard', '/admin-dashboard', '/virtual-dashboard'];
+const DASHBOARD_PATHS = ['/user-dashboard', '/it-dashboard', '/admin-dashboard', '/voucher-dashboard'];
 
 const UnifiedSidebar = ({ activePath }) => {
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ const UnifiedSidebar = ({ activePath }) => {
   const role = (user?.role || '').toLowerCase();
   const isAdmin = role === 'admin';
   const isIT = role === 'manager' || role === 'it';
-  const isVirtual = role === 'virtual';
+  const isVoucher = role === 'voucher';
 
   useEffect(() => {
     if (DASHBOARD_PATHS.includes(location.pathname)) {
@@ -37,9 +37,9 @@ const UnifiedSidebar = ({ activePath }) => {
     if (DASHBOARD_PATHS.includes(savedDashboard)) return savedDashboard;
     if (isAdmin) return '/admin-dashboard';
     if (isIT) return '/it-dashboard';
-    if (isVirtual) return '/virtual-dashboard';
+    if (isVoucher) return '/voucher-dashboard';
     return '/user-dashboard';
-  }, [isAdmin, isIT, isVirtual]);
+  }, [isAdmin, isIT, isVoucher]);
 
   const items = isAdmin
     ? [
@@ -47,7 +47,7 @@ const UnifiedSidebar = ({ activePath }) => {
         { name: 'Tickets', icon: FaTicketAlt, path: '/voucher' },
         { name: 'Users', icon: FaUsers, path: '/admin/users' },
         { name: 'Assets', icon: FaBoxOpen, path: '/data-assets' },
-        { name: 'Asset Issuance', icon: FaExchangeAlt, path: '/asset-issuance' },
+        { name: 'Vouchers', icon: FaExchangeAlt, path: '/asset-issuance' },
         { name: 'Disposal', icon: FaHeadset, path: '/disposal' },
         { name: 'Documents', icon: FaFileContract, path: '/document' },
         { name: 'Reports', icon: FaChartBar, path: '/report' },
@@ -58,8 +58,17 @@ const UnifiedSidebar = ({ activePath }) => {
         { name: 'Dashboard', icon: FaHome, path: dashboardPath },
         { name: 'Tickets', icon: FaTicketAlt, path: '/voucher' },
         { name: 'Assets', icon: FaBoxOpen, path: '/data-assets' },
-        { name: 'Asset Issuance', icon: FaExchangeAlt, path: '/asset-issuance' },
+        { name: 'Vouchers', icon: FaExchangeAlt, path: '/asset-issuance' },
         { name: 'Disposal', icon: FaHeadset, path: '/disposal' },
+        { name: 'Documents', icon: FaFileContract, path: '/document' },
+        { name: 'Reports', icon: FaChartBar, path: '/report' },
+        { name: 'Chatbot', icon: FaRobot, path: '/chatbot' },
+      ]
+    : isVoucher
+    ? [
+        { name: 'Dashboard', icon: FaHome, path: dashboardPath },
+        { name: 'Vouchers', icon: FaExchangeAlt, path: '/asset-issuance' },
+        { name: 'Assets', icon: FaBoxOpen, path: '/data-assets' },
         { name: 'Documents', icon: FaFileContract, path: '/document' },
         { name: 'Reports', icon: FaChartBar, path: '/report' },
         { name: 'Chatbot', icon: FaRobot, path: '/chatbot' },

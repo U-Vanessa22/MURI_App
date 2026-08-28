@@ -315,7 +315,7 @@ const AdminUsers = () => {
                   <option value="all">All Roles</option>
                   <option value="admin">Admin</option>
                   <option value="it">IT</option>
-                  <option value="virtual">Virtual</option>
+                  <option value="voucher">Voucher</option>
                   <option value="user">User</option>
                 </select>
 
@@ -480,7 +480,7 @@ const AdminUsers = () => {
                           <option value="USER">User</option>
                           <option value="IT">IT</option>
                           <option value="ADMIN">Admin</option>
-                          <option value="VIRTUAL">Virtual</option>
+                          <option value="VOUCHER">Voucher</option>
                         </select>
                         {formMode === 'edit' && editingUser?.id === currentUserId && (
                           <p className="field-hint">You cannot change your own role.</p>

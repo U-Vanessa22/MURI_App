@@ -68,6 +68,9 @@ def run_startup_migrations(engine) -> None:
         # Normalize legacy role casing (e.g., it, It) to uppercase for consistent auth/assignment behavior.
         connection.execute(text("UPDATE users SET role = UPPER(role) WHERE role IS NOT NULL AND role != UPPER(role)"))
 
+        # The "virtual" role was renamed to "voucher" (it now owns the asset-voucher dashboard).
+        connection.execute(text("UPDATE users SET role = 'VOUCHER' WHERE role = 'VIRTUAL'"))
+
         for column_name, ddl in required_document_columns.items():
             if document_columns and column_name not in document_columns:
                 connection.execute(text(ddl))
