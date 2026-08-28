@@ -5,6 +5,7 @@ import { ThemeProvider, createTheme } from '@mui/material';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeModeProvider } from './contexts/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import GuestRoute from './components/GuestRoute';
 import LoginPage from './screens/Login/LoginPage';
 import UserDashboard from './screens/Dashboards/User Dashboard/userdashboard';
 import VoucherPage from './screens/Voucherpage';
@@ -16,6 +17,9 @@ import Disposal from './screens/Disposal';
 import Document from './screens/Document';
 import AssetIssuance from './screens/AssetIssuance';
 import ITDashboard from './screens/Dashboards/IT Dashboard/itdashboard';
+import AdminDashboard from './screens/Dashboards/Admin Dashboard/admindashboard';
+import VoucherDashboard from './screens/Dashboards/Voucher Dashboard/voucherdashboard';
+import AdminUsers from './screens/AdminUsers';
 
 const theme = createTheme({
   palette: {
@@ -61,8 +65,8 @@ function App() {
         <AuthProvider>
           <Router>
             <Routes>
-            <Route path="/" element={<LoginPage />} />
-            <Route path="/login" element={<LoginPage />} />
+            <Route path="/" element={<GuestRoute><LoginPage /></GuestRoute>} />
+            <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
             
             <Route path="/user-dashboard" element={
               <ProtectedRoute requiredRoles={['user']}>
@@ -71,11 +75,29 @@ function App() {
             } />
             
             <Route path="/it-dashboard" element={
-              <ProtectedRoute requiredRoles={['admin', 'manager', 'it']}>
+              <ProtectedRoute requiredRoles={['manager', 'it']}>
                 <ITDashboard />
               </ProtectedRoute>
             } />
-            
+
+            <Route path="/admin-dashboard" element={
+              <ProtectedRoute requiredRoles={['admin']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/voucher-dashboard" element={
+              <ProtectedRoute requiredRoles={['voucher']}>
+                <VoucherDashboard />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/admin/users" element={
+              <ProtectedRoute requiredRoles={['admin']}>
+                <AdminUsers />
+              </ProtectedRoute>
+            } />
+
             <Route path="/voucher" element={
               <ProtectedRoute requiredRoles={['*']}>
                 <VoucherPage />
@@ -107,7 +129,7 @@ function App() {
             } />
             
             <Route path="/data-assets" element={
-              <ProtectedRoute requiredRoles={['admin', 'manager', 'it']}>
+              <ProtectedRoute requiredRoles={['admin', 'manager', 'it', 'voucher']}>
                 <DataAssets />
               </ProtectedRoute>
             } />
@@ -119,7 +141,7 @@ function App() {
             } />
 
             <Route path="/asset-issuance" element={
-              <ProtectedRoute requiredRoles={['admin', 'manager', 'it']}>
+              <ProtectedRoute requiredRoles={['admin', 'manager', 'it', 'voucher']}>
                 <AssetIssuance />
               </ProtectedRoute>
             } />
@@ -130,7 +152,7 @@ function App() {
               </ProtectedRoute>
             } />
             
-            <Route path="*" element={<LoginPage />} />
+            <Route path="*" element={<GuestRoute><LoginPage /></GuestRoute>} />
             </Routes>
           </Router>
         </AuthProvider>

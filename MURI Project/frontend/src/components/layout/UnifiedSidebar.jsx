@@ -11,35 +11,64 @@ import {
   FaRobot,
   FaSignOutAlt,
   FaTicketAlt,
+  FaUsers,
 } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
+
+const DASHBOARD_PATHS = ['/user-dashboard', '/it-dashboard', '/admin-dashboard', '/voucher-dashboard'];
 
 const UnifiedSidebar = ({ activePath }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
   const role = (user?.role || '').toLowerCase();
-  const isIT = ['admin', 'manager', 'it'].includes(role);
+  const isAdmin = role === 'admin';
+  const isIT = role === 'manager' || role === 'it';
+  const isVoucher = role === 'voucher';
 
   useEffect(() => {
-    if (location.pathname === '/user-dashboard' || location.pathname === '/it-dashboard') {
+    if (DASHBOARD_PATHS.includes(location.pathname)) {
       localStorage.setItem('asm_home_dashboard', location.pathname);
     }
   }, [location.pathname]);
 
   const dashboardPath = useMemo(() => {
     const savedDashboard = localStorage.getItem('asm_home_dashboard');
-    if (savedDashboard === '/user-dashboard' || savedDashboard === '/it-dashboard') return savedDashboard;
-    return isIT ? '/it-dashboard' : '/user-dashboard';
-  }, [isIT]);
+    if (DASHBOARD_PATHS.includes(savedDashboard)) return savedDashboard;
+    if (isAdmin) return '/admin-dashboard';
+    if (isIT) return '/it-dashboard';
+    if (isVoucher) return '/voucher-dashboard';
+    return '/user-dashboard';
+  }, [isAdmin, isIT, isVoucher]);
 
-  const items = isIT
+  const items = isAdmin
+    ? [
+        { name: 'Dashboard', icon: FaHome, path: dashboardPath },
+        { name: 'Tickets', icon: FaTicketAlt, path: '/voucher' },
+        { name: 'Users', icon: FaUsers, path: '/admin/users' },
+        { name: 'Assets', icon: FaBoxOpen, path: '/data-assets' },
+        { name: 'Vouchers', icon: FaExchangeAlt, path: '/asset-issuance' },
+        { name: 'Disposal', icon: FaHeadset, path: '/disposal' },
+        { name: 'Documents', icon: FaFileContract, path: '/document' },
+        { name: 'Reports', icon: FaChartBar, path: '/report' },
+        { name: 'Chatbot', icon: FaRobot, path: '/chatbot' },
+      ]
+    : isIT
     ? [
         { name: 'Dashboard', icon: FaHome, path: dashboardPath },
         { name: 'Tickets', icon: FaTicketAlt, path: '/voucher' },
         { name: 'Assets', icon: FaBoxOpen, path: '/data-assets' },
-        { name: 'Asset Issuance', icon: FaExchangeAlt, path: '/asset-issuance' },
+        { name: 'Vouchers', icon: FaExchangeAlt, path: '/asset-issuance' },
         { name: 'Disposal', icon: FaHeadset, path: '/disposal' },
+        { name: 'Documents', icon: FaFileContract, path: '/document' },
+        { name: 'Reports', icon: FaChartBar, path: '/report' },
+        { name: 'Chatbot', icon: FaRobot, path: '/chatbot' },
+      ]
+    : isVoucher
+    ? [
+        { name: 'Dashboard', icon: FaHome, path: dashboardPath },
+        { name: 'Vouchers', icon: FaExchangeAlt, path: '/asset-issuance' },
+        { name: 'Assets', icon: FaBoxOpen, path: '/data-assets' },
         { name: 'Documents', icon: FaFileContract, path: '/document' },
         { name: 'Reports', icon: FaChartBar, path: '/report' },
         { name: 'Chatbot', icon: FaRobot, path: '/chatbot' },
@@ -52,7 +81,7 @@ const UnifiedSidebar = ({ activePath }) => {
         { name: 'Chatbot', icon: FaRobot, path: '/chatbot' },
       ];
 
-  const settingsPath = isIT ? '/settings/it' : '/settings';
+  const settingsPath = isIT || isAdmin ? '/settings/it' : '/settings';
   const isActive = (path) => activePath ? activePath === path : location.pathname === path;
   const getInitials = () => (user?.full_name || user?.username || user?.email || 'U')
     .split(/\s|@/)

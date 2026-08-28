@@ -47,8 +47,12 @@ const LoginPage = () => {
         const userRole = (result.data?.user?.role || 'user').toLowerCase();
         
         // Redirect based on role
-        if (userRole === 'admin' || userRole === 'manager' || userRole === 'it') {
+        if (userRole === 'admin') {
+          navigate('/admin-dashboard');
+        } else if (userRole === 'manager' || userRole === 'it') {
           navigate('/it-dashboard');
+        } else if (userRole === 'voucher') {
+          navigate('/voucher-dashboard');
         } else {
           navigate('/user-dashboard');
         }

@@ -16,3 +16,6 @@ dist/
 
 # OS
 .DS_Store
+
+**/pnpm-lock.yaml
+.next/

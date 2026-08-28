@@ -33,6 +33,6 @@ def get_current_user(
 
 
 def require_it_user(current_user: User = Depends(get_current_user)) -> User:
-	if (current_user.role or "").upper() != "IT":
+	if (current_user.role or "").upper() not in {"IT", "ADMIN"}:
 		raise HTTPException(status_code=403, detail="Only IT personnel can perform this action")
 	return current_user
