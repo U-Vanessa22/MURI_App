@@ -4,6 +4,20 @@ import { authAPI } from '../services/api';
 
 const AuthContext = createContext({});
 
+// FastAPI sends validation errors (HTTP 422) as an array of objects under
+// `detail`, and everything else as a plain string. Collapse it to a single
+// string so it can be rendered directly in JSX without crashing React.
+const messageFromError = (err, fallback) => {
+  const detail = err?.response?.data?.detail;
+  if (Array.isArray(detail)) {
+    return detail.map((d) => d?.msg || String(d)).join(', ') || fallback;
+  }
+  if (typeof detail === 'string' && detail.trim()) {
+    return detail;
+  }
+  return fallback;
+};
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -65,8 +79,7 @@ export const AuthProvider = ({ children }) => {
       
       return { success: true, data: response };
     } catch (err) {
-      // REMOVED :any - this is plain JavaScript now
-      const errorMsg = err.response?.data?.detail || 'Login failed';
+      const errorMsg = messageFromError(err, 'Login failed');
       setError(errorMsg);
       return { success: false, error: errorMsg };
     }
@@ -78,7 +91,7 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.register(userData);
       return { success: true, data: response };
     } catch (err) {
-      const errorMsg = err.response?.data?.detail || 'Registration failed';
+      const errorMsg = messageFromError(err, 'Registration failed');
       setError(errorMsg);
       return { success: false, error: errorMsg };
     }
