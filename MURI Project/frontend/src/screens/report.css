@@ -187,7 +187,7 @@
 /* Main Content Styles - UPDATED FOR CONSISTENCY */
 /* ==================== */
 
-.main-content {
+.report-container .main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -873,10 +873,10 @@
     display: none;
   }
   
-  .main-content {
+  .report-container .main-content {
     padding: 0;
   }
-  
+
   .content-wrapper {
     padding: 20px;
   }

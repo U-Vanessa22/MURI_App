@@ -18,8 +18,6 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [acceptedPolicies, setAcceptedPolicies] = useState(false);
-  const [showPoliciesModal, setShowPoliciesModal] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,11 +36,6 @@ const LoginPage = () => {
 
     if (password.length < 8) {
       setError('Password must be at least 8 characters');
-      return;
-    }
-
-    if (!acceptedPolicies) {
-      setError('You must accept the Terms of Reference and Policies before continuing.');
       return;
     }
 
@@ -178,32 +171,10 @@ const LoginPage = () => {
                 </div>
               </div>
 
-             <div className="terms-acceptance-box">
-                <label className="terms-checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={acceptedPolicies}
-                    onChange={(e) => setAcceptedPolicies(e.target.checked)}
-                    disabled={loading}
-                  />
-                  <span>
-                      I accept the <strong>Terms of Reference</strong> and <strong>Policies</strong> to operate MURI as
-                    either a User or IT Personnel.
-                  </span>
-                </label>
-                <button
-                  type="button"
-                  className="terms-link-btn"
-                  onClick={() => setShowPoliciesModal(true)}
-                >
-                  Read Terms & Policies
-                </button>
-              </div>
-
               <button
                 type="submit"
                 className={`submit-btn signin-btn ${loading ? 'loading' : ''}`}
-                disabled={loading || !acceptedPolicies}
+                disabled={loading}
               >
                 {loading ? 'Signing In...' : 'Sign In'}
               </button>
@@ -211,69 +182,6 @@ const LoginPage = () => {
           </div>
         </div>
       </div>
-
-      {showPoliciesModal && (
-        <div className="policy-modal-overlay" role="dialog" aria-modal="true" aria-label="Terms and Policies">
-          <div className="policy-modal-content">
-            <div className="policy-modal-header">
-              <h3>Terms of Reference & Policies</h3>
-              <button type="button" className="policy-close-btn" onClick={() => setShowPoliciesModal(false)}>
-                Close
-              </button>
-            </div>
-
-            <div className="policy-modal-body">
-              <h4>1. Scope of Use</h4>
-              <p>
-                MURI is for authorized operational use by approved User and IT Personnel accounts only. Access is role-
-                based and must align with assigned responsibilities.
-              </p>
-
-              <h4>2. Account Responsibility</h4>
-              <p>
-                You are responsible for all activity performed under your account. Password sharing is prohibited.
-                Report suspected unauthorized access immediately.
-              </p>
-
-              <h4>3. Data Handling and Compliance</h4>
-              <p>
-                Asset, ticket, and document records must be accurate, lawful, and policy-compliant. Sensitive
-                information must not be disclosed to unauthorized parties.
-              </p>
-
-              <h4>4. IT Personnel Duties</h4>
-              <p>
-                IT Personnel must process assignments, update ticket status correctly, and manage records with
-                professionalism and audit readiness.
-              </p>
-
-              <h4>5. User Duties</h4>
-              <p>
-                Users must provide complete issue descriptions, maintain truthful records, and avoid misuse of ticketing
-                and request channels.
-              </p>
-
-              <h4>6. Enforcement</h4>
-              <p>
-                Violations may result in restricted access, account suspension, or disciplinary escalation according to
-                institutional policy.
-              </p>
-
-              <p className="policy-note">
-                Official source document:
-                {' '}
-                <a
-                  href="https://docs.google.com/document/d/1KyaDIMSdX4WoLciCt6j1FGWyCbiT97gGavaaygbSNQo/edit?usp=sharing"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Terms of Reference & Policies (Google Doc)
-                </a>
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -298,23 +298,6 @@ const AdminDashboard = () => {
     return null;
   }
 
-  const getUserInitials = () => {
-    if (user.full_name) {
-      const names = user.full_name.split(' ');
-      if (names.length >= 2) {
-        return `${names[0][0]}${names[1][0]}`.toUpperCase();
-      }
-      return names[0][0].toUpperCase();
-    }
-    if (user.username) {
-      return user.username.charAt(0).toUpperCase();
-    }
-    if (user.email) {
-      return user.email.charAt(0).toUpperCase();
-    }
-    return 'U';
-  };
-
   const notificationButton = (
     <button
       className="simple-icon-btn"
@@ -349,80 +332,6 @@ const AdminDashboard = () => {
           {toastMessage}
         </div>
       )}
-
-      {/* Header */}
-      <header className="simple-header">
-        <div className="simple-header-right">
-          <button
-            className="simple-icon-btn"
-            aria-label="Toggle notifications"
-            onClick={() => setShowNotifications((prev) => !prev)}
-          >
-            <FaBell aria-hidden="true" />
-            {unreadNotifications.length > 0 && (
-              <span className="notification-badge">{unreadNotifications.length}</span>
-            )}
-          </button>
-          <div className="simple-user">
-            <div className="simple-avatar">
-              {getUserInitials()}
-            </div>
-            <div className="simple-user-info">
-              <div className="simple-user-name">
-                {user.full_name || user.username || user.email}
-              </div>
-              <div className="simple-user-role">
-                {user.department && `${user.department} • `}{user.role || 'Admin'}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {showNotifications && (
-          <div className="simple-notification-panel">
-            <div className="simple-notification-header">
-              <h4>Notifications</h4>
-              {unreadNotifications.length > 0 && (
-                <button
-                  type="button"
-                  className="mark-all-btn"
-                  onClick={handleMarkAllNotificationsRead}
-                >
-                  Mark all as read
-                </button>
-              )}
-            </div>
-            {unreadNotifications.length > 0 ? (
-              unreadNotifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className={`notification-item ${notification.is_read ? 'is-read' : 'is-unread'}`}
-                >
-                  <div className="notification-text">{formatNotificationMessage(notification)}</div>
-                  <div className="notification-actions-row">
-                    <button
-                      type="button"
-                      className="view-ticket-btn"
-                      onClick={() => handleViewNotification(notification)}
-                    >
-                      View
-                    </button>
-                    <button
-                      type="button"
-                      className="mark-single-btn"
-                      onClick={() => handleMarkNotificationRead(notification.id)}
-                    >
-                      Mark as read
-                    </button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="notifications-empty">No new notifications</p>
-            )}
-          </div>
-        )}
-      </header>
 
       <div className="simple-container">
         {/* Sidebar - shared across all pages */}

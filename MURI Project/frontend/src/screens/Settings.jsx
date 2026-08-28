@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { FaBell, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import UnifiedSidebar from '../components/layout/UnifiedSidebar';
+import TopNavbar from '../components/layout/TopNavbar';
 import { usersAPI } from '../services/api';
 import { Checkbox } from '../components/ui/checkbox';
 import { Button } from '../components/ui/button';
@@ -78,9 +79,6 @@ const Settings = () => {
 
   const isITRole = useMemo(() => ['admin', 'manager', 'it'].includes(currentRole), [currentRole]);
   const canGrantAccess = isITRole;
-  const userLabel = accountInfo.username || accountInfo.email || 'User';
-  const userRoleLabel = (currentRole || 'user').toUpperCase();
-  const userInitial = (userLabel || 'U').charAt(0).toUpperCase();
 
   const clearStatusAfterDelay = () => {
     setTimeout(() => setStatusMessage({ text: '', type: '' }), 3000);
@@ -243,20 +241,10 @@ const Settings = () => {
       <UnifiedSidebar activePath={isITSettingsPage ? '/settings/it' : '/settings'} />
 
       <div className="setting-main">
+        <TopNavbar title={isITRole ? 'IT Settings' : 'Settings'} />
+
         <div className="setting-header">
           <h1 className="setting-title">{isITRole ? 'IT Settings' : 'Settings'}</h1>
-          <div className="setting-header-right">
-            <button className="setting-icon-btn" type="button" title="Notifications">
-              <FaBell />
-            </button>
-            <div className="setting-header-user">
-              <div className="setting-user-avatar">{userInitial}</div>
-              <div className="setting-user-meta">
-                <div className="setting-user-name">{accountInfo.email}</div>
-                <div className="setting-user-role">{userRoleLabel}</div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {statusMessage.text && <div className={`status-message ${statusMessage.type}`}>{statusMessage.text}</div>}
@@ -605,6 +593,60 @@ const Settings = () => {
           >
             Save Notification Preferences
           </Button>
+        </div>
+
+        <div className="setting-section">
+          <h2 className="section-title">Terms & Policies</h2>
+
+          <div className="terms-policy-text">
+            <h4>1. Scope of Use</h4>
+            <p>
+              MURI is for authorized operational use by approved User and IT Personnel accounts only. Access is role-
+              based and must align with assigned responsibilities.
+            </p>
+
+            <h4>2. Account Responsibility</h4>
+            <p>
+              You are responsible for all activity performed under your account. Password sharing is prohibited.
+              Report suspected unauthorized access immediately.
+            </p>
+
+            <h4>3. Data Handling and Compliance</h4>
+            <p>
+              Asset, ticket, and document records must be accurate, lawful, and policy-compliant. Sensitive
+              information must not be disclosed to unauthorized parties.
+            </p>
+
+            <h4>4. IT Personnel Duties</h4>
+            <p>
+              IT Personnel must process assignments, update ticket status correctly, and manage records with
+              professionalism and audit readiness.
+            </p>
+
+            <h4>5. User Duties</h4>
+            <p>
+              Users must provide complete issue descriptions, maintain truthful records, and avoid misuse of ticketing
+              and request channels.
+            </p>
+
+            <h4>6. Enforcement</h4>
+            <p>
+              Violations may result in restricted access, account suspension, or disciplinary escalation according to
+              institutional policy.
+            </p>
+
+            <p className="terms-policy-note">
+              Official source document:
+              {' '}
+              <a
+                href="https://docs.google.com/document/d/1KyaDIMSdX4WoLciCt6j1FGWyCbiT97gGavaaygbSNQo/edit?usp=sharing"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Terms of Reference & Policies (Google Doc)
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>

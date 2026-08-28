@@ -9,7 +9,7 @@
 /* Sidebar styling now lives entirely in components/layout/unifiedSidebar.css - do not duplicate it here */
 
 /* Main Content */
-.main-content {
+.disposal-page .main-content {
   flex: 1;
   padding: 30px;
 }
@@ -688,7 +688,7 @@
 
 /* Responsive Design */
 @media (max-width: 992px) {
-  .main-content {
+  .disposal-page .main-content {
     padding: 20px;
   }
 
@@ -804,6 +804,7 @@
 
 .disposal-page .muri-topnav,
 .asset-issuance-page .muri-topnav {
+  margin: -30px -36px 30px;
   border-radius: 0;
 }
 

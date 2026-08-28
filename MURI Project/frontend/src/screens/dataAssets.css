@@ -9,9 +9,15 @@
 /* Sidebar styling now lives entirely in components/layout/unifiedSidebar.css - do not duplicate it here */
 
 /* Main Content */
-.main-content {
+.data-assets-page .main-content {
   flex: 1;
   padding: 30px;
+}
+
+/* Bleed the shared top bar to the edges of main-content, matching every other page */
+.data-assets-page .muri-topnav {
+  margin: -30px -30px 30px;
+  border-radius: 0;
 }
 
 /* Header */
@@ -713,7 +719,7 @@
 }
 
 @media (max-width: 768px) {
-  .main-content {
+  .data-assets-page .main-content {
     padding: 20px;
   }
 

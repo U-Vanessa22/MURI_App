@@ -1,4 +1,5 @@
 import type { AppProps } from 'next/app';
+import Head from 'next/head';
 // Next.js only allows global CSS to be imported here, in _app.
 // All of these were plain (non-Module) global stylesheets under CRA too -
 // this just moves the import statements, no className/JSX logic changed.
@@ -25,5 +26,13 @@ import '../screens/settings.css';
 import '../screens/adminUsers.css';
 
 export default function MyApp({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />;
+  return (
+    <>
+      <Head>
+        <title>MURI | Support & Logistics Platform</title>
+        <link rel="icon" href="/Logo-trp.png" type="image/png" />
+      </Head>
+      <Component {...pageProps} />
+    </>
+  );
 }

@@ -4,7 +4,6 @@ import {
   FaTicketAlt,
   FaRobot,
   FaFile,
-  FaBell,
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -19,8 +18,6 @@ const DONE_STATUSES = ['resolved', 'closed'];
 const UserDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [notifications] = useState([]);
   const [myTickets, setMyTickets] = useState([]);
   const [ticketsError, setTicketsError] = useState('');
 
@@ -82,64 +79,12 @@ const UserDashboard = () => {
       icon: <FaTicketAlt />,
     }));
 
-  // Generate initials for avatar
-  const getUserInitials = () => {
-    if (user?.email) {
-      return user.email.charAt(0).toUpperCase();
-    }
-    return 'U';
-  };
-
   if (!user) {
     return null;
   }
 
   return (
     <div className="simple-dashboard-root">
-      {/* Header */}
-      <header className="simple-header">
-        <div className="simple-header-right">
-          <button
-            className="simple-icon-btn"
-            aria-label="Toggle notifications"
-            onClick={() => setShowNotifications((prev) => !prev)}
-          >
-            <FaBell aria-hidden="true" />
-            {notifications.length > 0 && (
-              <span className="notification-badge">{notifications.length}</span>
-            )}
-          </button>
-          <div className="simple-user">
-            <div className="simple-avatar">
-              {getUserInitials()}
-            </div>
-            <div className="simple-user-info">
-              <div className="simple-user-name">
-                {user.email}
-              </div>
-              <div className="simple-user-role">
-                {user.role || 'User'}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {showNotifications && (
-          <div className="simple-notification-panel">
-            <h4>Notifications</h4>
-            {notifications.length > 0 ? (
-              notifications.map(notification => (
-                <div key={notification.id} className="notification-item">
-                  {notification.message}
-                </div>
-              ))
-            ) : (
-              <p>No new notifications</p>
-            )}
-          </div>
-        )}
-      </header>
-
       <div className="simple-container">
         {/* Sidebar - shared across all pages */}
         <UnifiedSidebar activePath="/user-dashboard" />

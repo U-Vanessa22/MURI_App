@@ -14,7 +14,7 @@
 /* Sidebar is now the shared UnifiedSidebar component (components/layout/unifiedSidebar.css) */
 /* Header is now the shared TopNavbar component (components/layout/topNavbar.css) */
 
-.main-content {
+.chatbot-container .main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -318,7 +318,7 @@
     margin: 20px 15px;
   }
 
-  .main-content {
+  .chatbot-container .main-content {
     padding: 0;
   }
 }

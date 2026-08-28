@@ -124,12 +124,21 @@
 
 .setting-main {
   flex: 1;
-  padding: 30px 40px;
+  padding: 0 40px 30px;
   overflow-y: auto;
 }
 
 .setting-container.dark .setting-main {
   background: #0f172a;
+}
+
+/* Top bar sits flush against the top/left/right edges of setting-main (no top
+   padding to bleed through - overflow-y: auto on this parent stops a negative
+   top margin from cancelling padding the way it does on pages that scroll via
+   the document instead), matching every other page. */
+.setting-container .muri-topnav {
+  margin: 0 -40px 30px;
+  border-radius: 0;
 }
 
 .setting-header {
@@ -810,4 +819,45 @@
     padding: 12px 20px;
     font-size: 15px;
   }
+}
+
+/* ==================== */
+/* Terms & Policies - view only, no acceptance required */
+/* ==================== */
+
+.terms-policy-text h4 {
+  color: #1e293b;
+  margin: 14px 0 6px;
+}
+
+.terms-policy-text h4:first-child {
+  margin-top: 0;
+}
+
+.terms-policy-text p {
+  margin: 0 0 8px;
+  line-height: 1.55;
+  color: #475569;
+}
+
+.setting-container.dark .terms-policy-text h4 {
+  color: #e5e7eb;
+}
+
+.setting-container.dark .terms-policy-text p {
+  color: #9ca3af;
+}
+
+.terms-policy-note {
+  margin-top: 12px;
+  font-size: 0.9rem;
+  background: #f8fafc;
+  border: 1px solid #dbe3f1;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.setting-container.dark .terms-policy-note {
+  background: #0f172a;
+  border-color: #0F172A;
 }
