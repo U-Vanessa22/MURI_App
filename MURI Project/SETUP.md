@@ -57,9 +57,10 @@ cd "MURI Project/frontend"
 npm install
 ```
 
-There's no `.env` required — `src/config/apiConfig.js` and `src/services/api.js` both default to
-`http://localhost:8000` automatically when running in dev mode. If you do want to override it
-(e.g. pointing at a deployed backend), copy `.env.example` and set `REACT_APP_API_URL`:
+`src/services/api.js` defaults to `http://localhost:8000`, so no `.env` is required for local
+dev. To point at a different backend, copy `.env.example` to `.env` and set `NEXT_PUBLIC_API_URL`
+(Next.js only exposes `NEXT_PUBLIC_*` to the browser; `REACT_APP_API_URL` is still read as a
+fallback for the older CRA build):
 ```bash
 cp .env.example .env
 ```
@@ -76,6 +77,30 @@ npm start
 This is Create React App (`react-scripts`), not Vite — `start`, not `dev`. Opens on
 `http://localhost:3000` (CRA's default; nothing in this repo overrides `PORT`). The backend's
 `CORS_ORIGINS` already allows both `3000` and `3001`, so either works if you ever do change it.
+
+## Authentication
+
+Login uses the existing JWT (email/password) authentication already built into the backend
+(`backend/app/api/routes/auth.py`). Google / institutional SSO was considered but not used this
+week: the existing auth already works, and adding OAuth would be new, unnecessary scope.
+
+### How it works
+- `POST /auth/register` creates an account; `POST /auth/login` returns a JWT plus the user
+  record. The frontend stores both in `localStorage` and sends `Authorization: Bearer <token>`
+  on every request.
+- Only organization emails (`@icttoolsasm.com`) are accepted — enforced by both the login form
+  and the backend.
+- After login the user is routed to a dashboard by role: `admin` → `/admin-dashboard`,
+  `manager`/`it` → `/it-dashboard`, `voucher` → `/voucher-dashboard`, everyone else →
+  `/user-dashboard`. Single source of truth: `frontend/src/utils/roles.ts`.
+- Tokens expire after 60 minutes; there is no refresh token, so an expired session returns the
+  user to the login page.
+
+### Accounts for testing
+There is no sign-up screen in the UI. Create accounts via `POST /auth/register` at
+http://127.0.0.1:8000/docs, or ask Chance for a seed account password (e.g.
+`admin@icttoolsasm.com`, `testuser@icttoolsasm.com`). IT/Admin users can also create accounts
+from the Admin → Users screen.
 
 ## Running both together
 Two terminals, both from `MURI Project/`:
