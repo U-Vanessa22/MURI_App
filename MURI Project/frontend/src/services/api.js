@@ -1,6 +1,12 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+// Next.js only exposes NEXT_PUBLIC_* to the browser bundle; react-scripts (CRA)
+// only exposes REACT_APP_*. Support both so the same .env works under either
+// toolchain, then fall back to the local backend.
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  process.env.REACT_APP_API_URL ||
+  'http://localhost:8000';
 
 const api = axios.create({
   baseURL: API_URL,
