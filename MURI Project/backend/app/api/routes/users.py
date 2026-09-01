@@ -7,10 +7,10 @@ from app.db.session import SessionLocal
 from app.models.user import User
 from app.models.voucher import Voucher
 from app.models.document import Document
-from app.core.security import hash_password
+from app.core.security import generate_temporary_password, hash_password
 from app.api.deps import require_it_user
-from app.schemas.auth_schema import RegisterRequest
-from app.schemas.user_schema import UserUpdateRequest
+from app.schemas.user_schema import AdminCreateUserRequest, UserUpdateRequest
+from app.services.email_service import EmailDeliveryError, send_welcome_email
 
 router = APIRouter()
 ORG_DOMAIN = "@icttoolsasm.com"
@@ -32,7 +32,7 @@ def get_db():
 
 @router.post("/create-user")
 def create_user(
-    payload: RegisterRequest,
+    payload: AdminCreateUserRequest,
     db: Session = Depends(get_db),
     _: User = Depends(require_it_user),
 ):
@@ -44,7 +44,7 @@ def create_user(
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    hashed = hash_password(payload.password)
+    temporary_password = generate_temporary_password()
 
     user = User(
         email=payload.email,
@@ -52,7 +52,7 @@ def create_user(
         full_name=payload.full_name,
         department=payload.department,
         station=payload.station,
-        password=hashed,
+        password=hash_password(temporary_password),
         role=(payload.role or "USER").upper(),
     )
 
@@ -60,7 +60,22 @@ def create_user(
     db.commit()
     db.refresh(user)
 
-    return {"message": "User created successfully"}
+    try:
+        send_welcome_email(
+            to_email=user.email,
+            full_name=user.full_name,
+            username=user.username,
+            temporary_password=temporary_password,
+        )
+    except EmailDeliveryError as exc:
+        # The account was created but the user has no way to learn the
+        # password, so undo it and surface the failure to the admin instead
+        # of leaving an inaccessible account behind.
+        db.delete(user)
+        db.commit()
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    return {"message": "User created successfully. Login details were emailed to them."}
 
 
 @router.get("/")

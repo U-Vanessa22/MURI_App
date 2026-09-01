@@ -21,8 +21,6 @@ const EMPTY_FORM = {
   department: '',
   station: '',
   role: 'USER',
-  password: '',
-  confirmPassword: '',
 };
 
 const AdminUsers = () => {
@@ -133,29 +131,18 @@ const AdminUsers = () => {
       return;
     }
 
-    if (!formState.password || formState.password.length < 8) {
-      setFormError('Password must be at least 8 characters.');
-      return;
-    }
-
-    if (formState.password !== formState.confirmPassword) {
-      setFormError('Passwords do not match.');
-      return;
-    }
-
     setFormError('');
     setFormSubmitting(true);
     try {
       await usersAPI.createUser({
         email: formState.email.trim().toLowerCase(),
         username: formState.username.trim().toLowerCase(),
-        password: formState.password,
         role: (formState.role || 'USER').toUpperCase(),
         full_name: formState.full_name.trim(),
         department: formState.department || null,
         station: formState.station || null,
       });
-      showActionFeedback('User created successfully.');
+      showActionFeedback('User created successfully. Login details were emailed to them.');
       closeFormModal();
       await loadUsers();
     } catch (error) {
@@ -488,26 +475,9 @@ const AdminUsers = () => {
                       </div>
 
                       {formMode === 'create' && (
-                        <div className="form-row">
-                          <div className="form-group half">
-                            <label>Password</label>
-                            <input
-                              type="password"
-                              value={formState.password}
-                              onChange={(e) => setFormState((prev) => ({ ...prev, password: e.target.value }))}
-                              placeholder="At least 8 characters"
-                            />
-                          </div>
-                          <div className="form-group half">
-                            <label>Confirm Password</label>
-                            <input
-                              type="password"
-                              value={formState.confirmPassword}
-                              onChange={(e) => setFormState((prev) => ({ ...prev, confirmPassword: e.target.value }))}
-                              placeholder="Confirm password"
-                            />
-                          </div>
-                        </div>
+                        <p className="field-hint">
+                          A temporary password will be generated and emailed to this address. They can change it after logging in.
+                        </p>
                       )}
                     </div>
 

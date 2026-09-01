@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import UnifiedSidebar from '../components/layout/UnifiedSidebar';
 import TopNavbar from '../components/layout/TopNavbar';
 import { usersAPI } from '../services/api';
@@ -18,8 +17,6 @@ const Settings = () => {
     firstName: '',
     lastName: '',
     grantUsername: '',
-    password: '',
-    confirmPassword: '',
     station: '',
     department: '',
     role: 'USER',
@@ -40,8 +37,6 @@ const Settings = () => {
     rabTag: '',
   });
   const [statusMessage, setStatusMessage] = useState({ text: '', type: '' });
-  const [showGrantPassword, setShowGrantPassword] = useState(false);
-  const [showGrantConfirmPassword, setShowGrantConfirmPassword] = useState(false);
   const [notificationPrefs, setNotificationPrefs] = useState({
     soundEnabled: true,
     toastEnabled: true,
@@ -49,8 +44,6 @@ const Settings = () => {
   const [quickAccessForm, setQuickAccessForm] = useState({
     email: '',
     username: '',
-    password: '',
-    confirmPassword: '',
   });
 
   const isITSettingsPage = location.pathname.startsWith('/settings/it');
@@ -129,20 +122,8 @@ const Settings = () => {
     }
 
     const fullName = `${accountInfo.firstName || ''} ${accountInfo.lastName || ''}`.trim();
-    if (!fullName || !accountInfo.email || !accountInfo.password || !accountInfo.grantUsername) {
-      setStatusMessage({ text: 'First name, last name, username, email and password are required.', type: 'error' });
-      clearStatusAfterDelay();
-      return;
-    }
-
-    if (accountInfo.password !== accountInfo.confirmPassword) {
-      setStatusMessage({ text: 'Member access passwords do not match.', type: 'error' });
-      clearStatusAfterDelay();
-      return;
-    }
-
-    if (accountInfo.password.length < 8) {
-      setStatusMessage({ text: 'Member password must be at least 8 characters.', type: 'error' });
+    if (!fullName || !accountInfo.email || !accountInfo.grantUsername) {
+      setStatusMessage({ text: 'First name, last name, username, and email are required.', type: 'error' });
       clearStatusAfterDelay();
       return;
     }
@@ -158,7 +139,6 @@ const Settings = () => {
     try {
       await usersAPI.createUser({
         email: accountInfo.email,
-        password: accountInfo.password,
         role: (accountInfo.role || 'USER').toUpperCase(),
         username: generatedUsername,
         full_name: fullName,
@@ -166,15 +146,13 @@ const Settings = () => {
         station: accountInfo.station || null,
       });
 
-      setStatusMessage({ text: 'User access granted successfully.', type: 'success' });
+      setStatusMessage({ text: 'User access granted. Login details were emailed to them.', type: 'success' });
       window.dispatchEvent(new Event('asm-users-updated'));
       setAccountInfo((prev) => ({
         ...prev,
         firstName: '',
         lastName: '',
         grantUsername: '',
-        password: '',
-        confirmPassword: '',
         station: '',
         department: '',
         role: 'USER',
@@ -193,20 +171,8 @@ const Settings = () => {
 
     const normalizedEmail = (quickAccessForm.email || '').trim().toLowerCase();
     const normalizedUsername = (quickAccessForm.username || '').trim().toLowerCase();
-    if (!normalizedEmail || !normalizedUsername || !quickAccessForm.password || !quickAccessForm.confirmPassword) {
-      setStatusMessage({ text: 'Email, username, password, and confirm password are required.', type: 'error' });
-      clearStatusAfterDelay();
-      return;
-    }
-
-    if (quickAccessForm.password !== quickAccessForm.confirmPassword) {
-      setStatusMessage({ text: 'Passwords do not match.', type: 'error' });
-      clearStatusAfterDelay();
-      return;
-    }
-
-    if (quickAccessForm.password.length < 8) {
-      setStatusMessage({ text: 'Password must be at least 8 characters.', type: 'error' });
+    if (!normalizedEmail || !normalizedUsername) {
+      setStatusMessage({ text: 'Email and username are required.', type: 'error' });
       clearStatusAfterDelay();
       return;
     }
@@ -215,15 +181,14 @@ const Settings = () => {
       await usersAPI.createUser({
         username: normalizedUsername,
         email: normalizedEmail,
-        password: quickAccessForm.password,
         role: 'USER',
         full_name: normalizedUsername,
         department: null,
         station: null,
       });
 
-      setQuickAccessForm({ email: '', username: '', password: '', confirmPassword: '' });
-      setStatusMessage({ text: 'User access granted successfully.', type: 'success' });
+      setQuickAccessForm({ email: '', username: '' });
+      setStatusMessage({ text: 'User access granted. Login details were emailed to them.', type: 'success' });
       window.dispatchEvent(new Event('asm-users-updated'));
     } catch (error) {
       setStatusMessage({ text: error?.response?.data?.detail || 'Failed to grant user access.', type: 'error' });
@@ -336,27 +301,7 @@ const Settings = () => {
               />
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <input
-                type="password"
-                className="form-input"
-                value={quickAccessForm.password}
-                onChange={(e) => setQuickAccessForm((prev) => ({ ...prev, password: e.target.value }))}
-                placeholder="Enter password"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Confirm Password</label>
-              <input
-                type="password"
-                className="form-input"
-                value={quickAccessForm.confirmPassword}
-                onChange={(e) => setQuickAccessForm((prev) => ({ ...prev, confirmPassword: e.target.value }))}
-                placeholder="Confirm password"
-              />
-            </div>
+            <p className="field-hint">A temporary password will be generated and emailed to this address.</p>
 
             <button className="save-btn" onClick={handleQuickGrantAccess} type="button">
               Grant Access
@@ -409,45 +354,7 @@ const Settings = () => {
               />
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <div className="password-input-group">
-                <input
-                  type={showGrantPassword ? 'text' : 'password'}
-                  className="form-input"
-                  value={accountInfo.password}
-                  onChange={(e) => setAccountInfo({ ...accountInfo, password: e.target.value })}
-                />
-                <button
-                  className="password-toggle-btn"
-                  type="button"
-                  onClick={() => setShowGrantPassword((prev) => !prev)}
-                  aria-label={showGrantPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showGrantPassword ? <FaEyeSlash /> : <FaEye />}
-                </button>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Confirm Password</label>
-              <div className="password-input-group">
-                <input
-                  type={showGrantConfirmPassword ? 'text' : 'password'}
-                  className="form-input"
-                  value={accountInfo.confirmPassword}
-                  onChange={(e) => setAccountInfo({ ...accountInfo, confirmPassword: e.target.value })}
-                />
-                <button
-                  className="password-toggle-btn"
-                  type="button"
-                  onClick={() => setShowGrantConfirmPassword((prev) => !prev)}
-                  aria-label={showGrantConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
-                >
-                  {showGrantConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                </button>
-              </div>
-            </div>
+            <p className="field-hint">A temporary password will be generated and emailed to this address.</p>
 
             <div className="form-group">
               <label className="form-label">Station</label>

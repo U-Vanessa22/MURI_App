@@ -72,6 +72,9 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)) -> AuthRes
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
+    # Self-service registration must never let the caller pick their own
+    # role — role is always USER here; elevation only happens through the
+    # admin-only /users/create-user or /users/{id} endpoints.
     user = User(
         email=payload.email,
         username=payload.username,
@@ -79,7 +82,7 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)) -> AuthRes
         department=payload.department,
         station=payload.station,
         password=hash_password(payload.password),
-        role=(payload.role or "USER").upper(),
+        role="USER",
     )
 
     db.add(user)

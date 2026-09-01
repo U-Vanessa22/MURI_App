@@ -1,3 +1,6 @@
+import secrets
+import string
+
 from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
@@ -8,6 +11,15 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 SECRET_KEY = settings.jwt_secret_key
 ALGORITHM = settings.jwt_algorithm
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.access_token_expire_minutes
+
+# Excludes visually ambiguous characters (0/O, 1/l/I) so a temporary
+# password read out of an email doesn't get mistyped.
+_PASSWORD_ALPHABET = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789!@#$%"
+
+
+def generate_temporary_password(length: int = 12) -> str:
+    return "".join(secrets.choice(_PASSWORD_ALPHABET) for _ in range(length))
+
 
 def hash_password(password: str):
     return pwd_context.hash(password)

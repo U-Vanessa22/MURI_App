@@ -37,6 +37,14 @@ class Settings:
 	rag_chunk_size: int = int(os.getenv("RAG_CHUNK_SIZE", "700"))
 	rag_chunk_overlap: int = int(os.getenv("RAG_CHUNK_OVERLAP", "120"))
 	rag_top_k: int = int(os.getenv("RAG_TOP_K", "5"))
+	smtp_host: str = os.getenv("SMTP_HOST", "")
+	smtp_port: int = int(os.getenv("SMTP_PORT", "587"))
+	smtp_username: str = os.getenv("SMTP_USERNAME", "")
+	smtp_password: str = os.getenv("SMTP_PASSWORD", "")
+	smtp_use_tls: bool = os.getenv("SMTP_USE_TLS", "true").strip().lower() != "false"
+	smtp_from_email: str = os.getenv("SMTP_FROM_EMAIL", "")
+	smtp_from_name: str = os.getenv("SMTP_FROM_NAME", "MURI")
+	frontend_login_url: str = os.getenv("FRONTEND_LOGIN_URL", "http://localhost:3000/login")
 
 
 settings = Settings()
