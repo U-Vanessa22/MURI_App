@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
+  FaBuilding,
   FaSearch,
   FaTimes,
   FaPlus,
@@ -12,7 +14,8 @@ import {
 import UnifiedSidebar from '../components/layout/UnifiedSidebar';
 import TopNavbar from '../components/layout/TopNavbar';
 import { useAuth } from '../contexts/AuthContext';
-import { usersAPI } from '../services/api';
+import { departmentAPI, stationAPI, usersAPI } from '../services/api';
+import { optionsWithFallback } from '../utils/lookupOptions';
 
 const EMPTY_FORM = {
   full_name: '',
@@ -51,6 +54,10 @@ const AdminUsers = () => {
   const [deleteError, setDeleteError] = useState('');
   const [deleteSubmitting, setDeleteSubmitting] = useState(false);
 
+  const [departments, setDepartments] = useState([]);
+  const [stations, setStations] = useState([]);
+
+  const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const currentUserId = currentUser?.id ?? null;
 
@@ -66,11 +73,23 @@ const AdminUsers = () => {
     }
   }, []);
 
+  const loadLookups = useCallback(async () => {
+    try {
+      const [departmentData, stationData] = await Promise.all([departmentAPI.list(), stationAPI.list()]);
+      setDepartments(departmentData || []);
+      setStations(stationData || []);
+    } catch {
+      // Falls back to empty option lists; the form still works with the
+      // fallback-current-value option if the user already has one set.
+    }
+  }, []);
+
   useEffect(() => {
     loadUsers();
+    loadLookups();
     window.addEventListener('asm-users-updated', loadUsers);
     return () => window.removeEventListener('asm-users-updated', loadUsers);
-  }, [loadUsers]);
+  }, [loadUsers, loadLookups]);
 
   const showActionFeedback = (text, type = 'success') => {
     setActionMessage({ text, type });
@@ -312,6 +331,10 @@ const AdminUsers = () => {
                   <option value="inactive">Inactive</option>
                 </select>
 
+                <button type="button" className="row-action-btn" onClick={() => navigate('/admin/departments-stations')}>
+                  <FaBuilding /> Departments & Stations
+                </button>
+
                 <button type="button" className="admin-users-add-btn" onClick={openCreateModal}>
                   <FaPlus /> Add User
                 </button>
@@ -439,21 +462,27 @@ const AdminUsers = () => {
                       <div className="form-row">
                         <div className="form-group half">
                           <label>Department</label>
-                          <input
-                            type="text"
+                          <select
                             value={formState.department}
                             onChange={(e) => setFormState((prev) => ({ ...prev, department: e.target.value }))}
-                            placeholder="Department"
-                          />
+                          >
+                            <option value="">Select department</option>
+                            {optionsWithFallback(departments, formState.department).map((department) => (
+                              <option key={department.id} value={department.name}>{department.name}</option>
+                            ))}
+                          </select>
                         </div>
                         <div className="form-group half">
                           <label>Station</label>
-                          <input
-                            type="text"
+                          <select
                             value={formState.station}
                             onChange={(e) => setFormState((prev) => ({ ...prev, station: e.target.value }))}
-                            placeholder="Station"
-                          />
+                          >
+                            <option value="">Select station</option>
+                            {optionsWithFallback(stations, formState.station).map((station) => (
+                              <option key={station.id} value={station.name}>{station.name}</option>
+                            ))}
+                          </select>
                         </div>
                       </div>
 
@@ -564,6 +593,7 @@ const AdminUsers = () => {
                   </div>
                 </div>
               )}
+
             </div>
           </div>
         </main>

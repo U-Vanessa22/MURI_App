@@ -20,6 +20,7 @@ import ITDashboard from './screens/Dashboards/IT Dashboard/itdashboard';
 import AdminDashboard from './screens/Dashboards/Admin Dashboard/admindashboard';
 import VoucherDashboard from './screens/Dashboards/Voucher Dashboard/voucherdashboard';
 import AdminUsers from './screens/AdminUsers';
+import DepartmentsStations from './screens/DepartmentsStations';
 
 const theme = createTheme({
   palette: {
@@ -95,6 +96,12 @@ function App() {
             <Route path="/admin/users" element={
               <ProtectedRoute requiredRoles={['admin']}>
                 <AdminUsers />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/admin/departments-stations" element={
+              <ProtectedRoute requiredRoles={['admin']}>
+                <DepartmentsStations />
               </ProtectedRoute>
             } />
 

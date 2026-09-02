@@ -5,8 +5,12 @@ import TopNavbar from '../components/layout/TopNavbar';
 import { assetAPI, usersAPI } from '../services/api';
 import { ButtonUtility } from '../components/ui/button-utility';
 import { Eye, Pencil } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const DataAssets = () => {
+  const { user: currentUser } = useAuth();
+  const canManageUsers = ['admin', 'it'].includes((currentUser?.role || '').toLowerCase());
+
   const [activeTab, setActiveTab] = useState('data'); // 'data' or 'assets'
   const [showAddModal, setShowAddModal] = useState(false);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
@@ -22,34 +26,30 @@ const DataAssets = () => {
   const [userLoadMessage, setUserLoadMessage] = useState('');
   const [userActionMessage, setUserActionMessage] = useState({ text: '', type: '' });
 
-  const [devices, setDevices] = useState([
-    { id: 1, deviceType: 'Laptop', deviceModel: 'Dell XPS 15', serialNumber: 'SN123456789', rabTag: 'RAB001', assignedTo: 'John Doe', status: 'Active' },
-    { id: 2, deviceType: 'Desktop', deviceModel: 'HP EliteDesk', serialNumber: 'SN987654321', rabTag: 'RAB002', assignedTo: 'Jane Smith', status: 'Active' },
-    { id: 3, deviceType: 'Tablet', deviceModel: 'iPad Pro', serialNumber: 'SN456789123', rabTag: 'RAB003', assignedTo: 'Robert Johnson', status: 'Maintenance' },
-    { id: 4, deviceType: 'Laptop', deviceModel: 'Lenovo ThinkPad', serialNumber: 'SN789123456', rabTag: 'RAB004', assignedTo: 'Maria Garcia', status: 'Active' },
-    { id: 5, deviceType: 'Mobile', deviceModel: 'Samsung Galaxy', serialNumber: 'SN321654987', rabTag: 'RAB005', assignedTo: 'David Kim', status: 'Inactive' },
-  ]);
-
   const [assets, setAssets] = useState([]);
 
   // New item form state
   const [newUser, setNewUser] = useState({ name: '', email: '', department: '', role: 'User', status: 'Active' });
-  const [newDevice, setNewDevice] = useState({ deviceType: '', deviceModel: '', serialNumber: '', rabTag: '', assignedTo: '', status: 'Active' });
-  const [newAsset, setNewAsset] = useState({ name: '', category: '', serial_number: '', status: 'Available', assigned_to: '' });
+  const [newAsset, setNewAsset] = useState({ name: '', category: '', serial_number: '', status: 'Available' });
 
   const loadUsers = useCallback(async () => {
     try {
       setUserLoadMessage('');
       const backendUsers = await usersAPI.listUsers();
-      const mappedUsers = (backendUsers || []).map((user) => ({
-        id: user.id,
-        name: user.full_name || user.username || user.email,
-        username: user.username || '-',
-        email: user.email,
-        department: user.department || '-',
-        role: user.role || 'USER',
-        status: user.is_active ? 'Active' : 'Inactive',
-      }));
+      // Reference roster of the staff assets/vouchers actually get issued
+      // to (Asset Issuance's "issued to" is free text) — not a place to
+      // manage IT/admin/voucher operator accounts, that's /admin/users.
+      const mappedUsers = (backendUsers || [])
+        .filter((user) => (user.role || '').toUpperCase() === 'USER')
+        .map((user) => ({
+          id: user.id,
+          name: user.full_name || user.username || user.email,
+          username: user.username || '-',
+          email: user.email,
+          department: user.department || '-',
+          role: user.role || 'USER',
+          status: user.is_active ? 'Active' : 'Inactive',
+        }));
       setUsers(mappedUsers);
     } catch {
       setUserLoadMessage('Unable to load users from server.');
@@ -123,21 +123,14 @@ const DataAssets = () => {
 
   const handleAddItem = async () => {
     if (activeTab === 'data') {
-      // Determine if adding user or device
-      // This is simplified - in real app, you'd have separate forms
-      const newId = users.length + devices.length + 1;
-      if (newUser.name) {
-        setUsers([...users, { id: newId, ...newUser }]);
-        setNewUser({ name: '', email: '', department: '', role: 'User', status: 'Active' });
-      } else if (newDevice.deviceType) {
-        setDevices([...devices, { id: newId, ...newDevice }]);
-        setNewDevice({ deviceType: '', deviceModel: '', serialNumber: '', rabTag: '', assignedTo: '', status: 'Active' });
-      }
+      const newId = users.length + 1;
+      setUsers([...users, { id: newId, ...newUser }]);
+      setNewUser({ name: '', email: '', department: '', role: 'User', status: 'Active' });
     } else {
       try {
         const createdAsset = await assetAPI.create(newAsset);
         setAssets((previous) => [createdAsset, ...previous]);
-        setNewAsset({ name: '', category: '', serial_number: '', status: 'Available', assigned_to: '' });
+        setNewAsset({ name: '', category: '', serial_number: '', status: 'Available' });
       } catch (error) {
         showActionFeedback(error?.response?.data?.detail || 'Failed to create asset.', 'error');
         return;
@@ -148,9 +141,7 @@ const DataAssets = () => {
 
   const handleRemoveItems = () => {
     if (activeTab === 'data') {
-      // Remove selected users and devices
       setUsers(users.filter(user => !selectedItems.includes(`user-${user.id}`)));
-      setDevices(devices.filter(device => !selectedItems.includes(`device-${device.id}`)));
     } else {
       Promise.all(assets.filter(asset => selectedItems.includes(`asset-${asset.id}`)).map((asset) => assetAPI.remove(asset.id)))
         .then(() => setAssets(assets.filter(asset => !selectedItems.includes(`asset-${asset.id}`))))
@@ -171,11 +162,7 @@ const DataAssets = () => {
 
   const selectAll = () => {
     if (activeTab === 'data') {
-      const allIds = [
-        ...users.map(u => `user-${u.id}`),
-        ...devices.map(d => `device-${d.id}`)
-      ];
-      setSelectedItems(allIds);
+      setSelectedItems(users.map(u => `user-${u.id}`));
     } else {
       setSelectedItems(assets.map(a => `asset-${a.id}`));
     }
@@ -191,13 +178,6 @@ const DataAssets = () => {
     (user.username || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.department.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const filteredDevices = devices.filter(device => 
-    device.deviceType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    device.deviceModel.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    device.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    device.rabTag.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const filteredAssets = assets.filter(asset => 
@@ -343,83 +323,27 @@ const DataAssets = () => {
                             </span>
                           </td>
                           <td>
-                            <button className="action-icon-btn action-reset" onClick={() => openResetPasswordModal(user)}>
-                              Reset PW
-                            </button>
-                            <button
-                              className={`action-icon-btn ${user.status === 'Active' ? 'action-deactivate' : 'action-activate'}`}
-                              onClick={() => handleToggleUserStatus(user)}
-                            >
-                              {user.status === 'Active' ? 'Deactivate' : 'Activate'}
-                            </button>
+                            {canManageUsers ? (
+                              <>
+                                <button className="action-icon-btn action-reset" onClick={() => openResetPasswordModal(user)}>
+                                  Reset PW
+                                </button>
+                                <button
+                                  className={`action-icon-btn ${user.status === 'Active' ? 'action-deactivate' : 'action-activate'}`}
+                                  onClick={() => handleToggleUserStatus(user)}
+                                >
+                                  {user.status === 'Active' ? 'Deactivate' : 'Activate'}
+                                </button>
+                              </>
+                            ) : (
+                              '-'
+                            )}
                           </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
                         <td colSpan="8" className="no-data">No users found</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Devices Section */}
-            <div className="data-category">
-              <h2 className="category-title">
-                {/*<span className="category-icon">📱</span>*/}
-                Devices
-              </h2>
-              <div className="table-container">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th className="checkbox-col">
-                        <input 
-                          type="checkbox" 
-                          onChange={(e) => e.target.checked ? selectAll() : deselectAll()}
-                        />
-                      </th>
-                      <th>Device Type</th>
-                      <th>Device Model</th>
-                      <th>Serial Number</th>
-                      <th>RAB Tag</th>
-                      <th>Assigned To</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredDevices.length > 0 ? (
-                      filteredDevices.map(device => (
-                        <tr key={`device-${device.id}`}>
-                          <td>
-                            <input 
-                              type="checkbox"
-                              checked={selectedItems.includes(`device-${device.id}`)}
-                              onChange={() => toggleSelectItem('device', device.id)}
-                            />
-                          </td>
-                          <td>{device.deviceType}</td>
-                          <td>{device.deviceModel}</td>
-                          <td>{device.serialNumber}</td>
-                          <td><span className="rab-tag">{device.rabTag}</span></td>
-                          <td>{device.assignedTo}</td>
-                          <td>
-                            <span className={`status-badge status-${device.status.toLowerCase()}`}>
-                              {device.status}
-                            </span>
-                          </td>
-                          <td>
-                            <ButtonUtility icon={Pencil} tooltip="Edit device" onClick={() => {}} />
-                            <ButtonUtility icon={Eye} tooltip="View device" onClick={() => {}} />
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="8" className="no-data">No devices found</td>
                       </tr>
                     )}
                   </tbody>
@@ -449,7 +373,6 @@ const DataAssets = () => {
                       <th>Asset Name</th>
                       <th>Category</th>
                       <th>Serial Number</th>
-                      <th>Assigned To</th>
                       <th>Status</th>
                       <th>Actions</th>
                     </tr>
@@ -468,7 +391,6 @@ const DataAssets = () => {
                           <td>{asset.name}</td>
                           <td>{asset.category}</td>
                           <td>{asset.serial_number}</td>
-                          <td>{asset.assigned_to || '-'}</td>
                           <td>
                             <span className={`status-badge status-${asset.status.toLowerCase()}`}>
                               {asset.status}
@@ -482,7 +404,7 @@ const DataAssets = () => {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="7" className="no-data">No assets found</td>
+                        <td colSpan="6" className="no-data">No assets found</td>
                       </tr>
                     )}
                   </tbody>
@@ -521,122 +443,52 @@ const DataAssets = () => {
           <div className="modal-overlay">
             <div className="modal-content">
               <div className="modal-header">
-                <h3>Add New {activeTab === 'data' ? 'Item' : 'Asset'}</h3>
+                <h3>Add New {activeTab === 'data' ? 'User' : 'Asset'}</h3>
                 <button className="close-modal" onClick={() => setShowAddModal(false)}>✕</button>
               </div>
-              
+
               <div className="modal-body">
                 {activeTab === 'data' ? (
-                  <div className="add-options">
-                    <div className="add-tabs">
-                      <button 
-                        className={`add-tab-btn ${newUser.name ? 'active' : ''}`}
-                        onClick={() => setNewUser({ ...newUser, name: ' ' })}
-                      >
-                        Add User
-                      </button>
-                      <button 
-                        className={`add-tab-btn ${newDevice.deviceType ? 'active' : ''}`}
-                        onClick={() => setNewDevice({ ...newDevice, deviceType: ' ' })}
-                      >
-                        Add Device
-                      </button>
+                  <div className="add-form">
+                    <h4>User Details</h4>
+                    <div className="form-group">
+                      <label>Full Name</label>
+                      <input
+                        type="text"
+                        value={newUser.name}
+                        onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                        placeholder="Enter full name"
+                      />
                     </div>
-
-                    {/* User Form */}
-                    <div className="add-form">
-                      <h4>User Details</h4>
-                      <div className="form-group">
-                        <label>Full Name</label>
-                        <input
-                          type="text"
-                          value={newUser.name}
-                          onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                          placeholder="Enter full name"
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label>Email</label>
-                        <input
-                          type="email"
-                          value={newUser.email}
-                          onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                          placeholder="email@rab.gov.rw"
-                        />
-                      </div>
-                      <div className="form-row">
-                        <div className="form-group half">
-                          <label>Department</label>
-                          <input
-                            type="text"
-                            value={newUser.department}
-                            onChange={(e) => setNewUser({ ...newUser, department: e.target.value })}
-                            placeholder="Department"
-                          />
-                        </div>
-                        <div className="form-group half">
-                          <label>Role</label>
-                          <select 
-                            value={newUser.role}
-                            onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-                          >
-                            <option value="User">User</option>
-                            <option value="Manager">Manager</option>
-                            <option value="Admin">Admin</option>
-                          </select>
-                        </div>
-                      </div>
+                    <div className="form-group">
+                      <label>Email</label>
+                      <input
+                        type="email"
+                        value={newUser.email}
+                        onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                        placeholder="email@rab.gov.rw"
+                      />
                     </div>
-
-                    {/* Device Form */}
-                    <div className="add-form">
-                      <h4>Device Details</h4>
-                      <div className="form-group">
-                        <label>Device Type</label>
+                    <div className="form-row">
+                      <div className="form-group half">
+                        <label>Department</label>
                         <input
                           type="text"
-                          value={newDevice.deviceType}
-                          onChange={(e) => setNewDevice({ ...newDevice, deviceType: e.target.value })}
-                          placeholder="e.g., Laptop, Desktop"
+                          value={newUser.department}
+                          onChange={(e) => setNewUser({ ...newUser, department: e.target.value })}
+                          placeholder="Department"
                         />
                       </div>
-                      <div className="form-group">
-                        <label>Device Model</label>
-                        <input
-                          type="text"
-                          value={newDevice.deviceModel}
-                          onChange={(e) => setNewDevice({ ...newDevice, deviceModel: e.target.value })}
-                          placeholder="e.g., Dell XPS 15"
-                        />
-                      </div>
-                      <div className="form-row">
-                        <div className="form-group half">
-                          <label>Serial Number</label>
-                          <input
-                            type="text"
-                            value={newDevice.serialNumber}
-                            onChange={(e) => setNewDevice({ ...newDevice, serialNumber: e.target.value })}
-                            placeholder="Serial #"
-                          />
-                        </div>
-                        <div className="form-group half">
-                          <label>RAB Tag</label>
-                          <input
-                            type="text"
-                            value={newDevice.rabTag}
-                            onChange={(e) => setNewDevice({ ...newDevice, rabTag: e.target.value })}
-                            placeholder="RAB001"
-                          />
-                        </div>
-                      </div>
-                      <div className="form-group">
-                        <label>Assigned To</label>
-                        <input
-                          type="text"
-                          value={newDevice.assignedTo}
-                          onChange={(e) => setNewDevice({ ...newDevice, assignedTo: e.target.value })}
-                          placeholder="Person name"
-                        />
+                      <div className="form-group half">
+                        <label>Role</label>
+                        <select
+                          value={newUser.role}
+                          onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                        >
+                          <option value="User">User</option>
+                          <option value="Manager">Manager</option>
+                          <option value="Admin">Admin</option>
+                        </select>
                       </div>
                     </div>
                   </div>
@@ -671,28 +523,17 @@ const DataAssets = () => {
                         />
                       </div>
                     </div>
-                    <div className="form-row">
-                      <div className="form-group half">
-                        <label>Assigned To</label>
-                        <input
-                          type="text"
-                          value={newAsset.assigned_to}
-                          onChange={(e) => setNewAsset({ ...newAsset, assigned_to: e.target.value })}
-                          placeholder="Staff member (optional)"
-                        />
-                      </div>
-                      <div className="form-group half">
-                        <label>Status</label>
-                        <select 
-                          value={newAsset.status}
-                          onChange={(e) => setNewAsset({ ...newAsset, status: e.target.value })}
-                        >
-                          <option value="Available">Available</option>
-                          <option value="Assigned">Assigned</option>
-                          <option value="Under Repair">Under Repair</option>
-                          <option value="Disposed">Disposed</option>
-                        </select>
-                      </div>
+                    <div className="form-group">
+                      <label>Status</label>
+                      <select
+                        value={newAsset.status}
+                        onChange={(e) => setNewAsset({ ...newAsset, status: e.target.value })}
+                      >
+                        <option value="Available">Available</option>
+                        <option value="Assigned">Assigned</option>
+                        <option value="Under Repair">Under Repair</option>
+                        <option value="Disposed">Disposed</option>
+                      </select>
                     </div>
                   </div>
                 )}

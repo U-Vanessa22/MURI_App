@@ -1,4 +1,28 @@
 from sqlalchemy import inspect, text
+from sqlalchemy.orm import Session
+
+
+def seed_lookup_tables(session: Session) -> None:
+    # Backfills the new departments/stations tables from whatever free-text
+    # values are already on existing users, so nothing already in use drops
+    # out of the new dropdowns.
+    from app.models.department import Department
+    from app.models.station import Station
+    from app.models.user import User
+
+    existing_departments = {row[0] for row in session.query(Department.name).all()}
+    for (value,) in session.query(User.department).filter(User.department.isnot(None), User.department != "").distinct():
+        if value not in existing_departments:
+            session.add(Department(name=value))
+            existing_departments.add(value)
+
+    existing_stations = {row[0] for row in session.query(Station.name).all()}
+    for (value,) in session.query(User.station).filter(User.station.isnot(None), User.station != "").distinct():
+        if value not in existing_stations:
+            session.add(Station(name=value))
+            existing_stations.add(value)
+
+    session.commit()
 
 
 def run_startup_migrations(engine) -> None:

@@ -36,3 +36,12 @@ def require_it_user(current_user: User = Depends(get_current_user)) -> User:
 	if (current_user.role or "").upper() not in {"IT", "ADMIN"}:
 		raise HTTPException(status_code=403, detail="Only IT personnel can perform this action")
 	return current_user
+
+
+def require_users_read_access(current_user: User = Depends(get_current_user)) -> User:
+	# Broader than require_it_user: covers roles that only need to look up
+	# users (e.g. voucher/manager picking an assignee) without granting
+	# write access (create, edit, reset password, activate/deactivate).
+	if (current_user.role or "").upper() not in {"IT", "ADMIN", "MANAGER", "VOUCHER"}:
+		raise HTTPException(status_code=403, detail="You do not have access to the user directory")
+	return current_user

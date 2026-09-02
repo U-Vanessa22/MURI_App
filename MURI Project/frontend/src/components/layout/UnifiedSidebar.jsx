@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   FaBoxOpen,
+  FaBuilding,
   FaChartBar,
   FaCog,
   FaExchangeAlt,
@@ -46,6 +47,7 @@ const UnifiedSidebar = ({ activePath }) => {
         { name: 'Dashboard', icon: FaHome, path: dashboardPath },
         { name: 'Tickets', icon: FaTicketAlt, path: '/voucher' },
         { name: 'Users', icon: FaUsers, path: '/admin/users' },
+        { name: 'Departments & Stations', icon: FaBuilding, path: '/admin/departments-stations' },
         { name: 'Assets', icon: FaBoxOpen, path: '/data-assets' },
         { name: 'Vouchers', icon: FaExchangeAlt, path: '/asset-issuance' },
         { name: 'Disposal', icon: FaHeadset, path: '/disposal' },

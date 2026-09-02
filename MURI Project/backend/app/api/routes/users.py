@@ -8,7 +8,7 @@ from app.models.user import User
 from app.models.voucher import Voucher
 from app.models.document import Document
 from app.core.security import generate_temporary_password, hash_password
-from app.api.deps import require_it_user
+from app.api.deps import require_it_user, require_users_read_access
 from app.schemas.user_schema import AdminCreateUserRequest, UserUpdateRequest
 from app.services.email_service import EmailDeliveryError, send_welcome_email
 
@@ -81,7 +81,7 @@ def create_user(
 @router.get("/")
 def list_users(
     db: Session = Depends(get_db),
-    _: User = Depends(require_it_user),
+    _: User = Depends(require_users_read_access),
 ):
     users = db.query(User).order_by(User.created_at.desc()).all()
 

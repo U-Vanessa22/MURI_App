@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import UnifiedSidebar from '../components/layout/UnifiedSidebar';
 import TopNavbar from '../components/layout/TopNavbar';
-import { usersAPI } from '../services/api';
+import { departmentAPI, stationAPI, usersAPI } from '../services/api';
+import { optionsWithFallback } from '../utils/lookupOptions';
 import { Checkbox } from '../components/ui/checkbox';
 import { Button } from '../components/ui/button';
 import { Check } from 'lucide-react';
@@ -45,6 +46,8 @@ const Settings = () => {
     email: '',
     username: '',
   });
+  const [departments, setDepartments] = useState([]);
+  const [stations, setStations] = useState([]);
 
   const isITSettingsPage = location.pathname.startsWith('/settings/it');
 
@@ -68,6 +71,13 @@ const Settings = () => {
       soundEnabled: savedSound === null ? true : savedSound === 'true',
       toastEnabled: savedToast === null ? true : savedToast === 'true',
     });
+
+    Promise.all([departmentAPI.list(), stationAPI.list()])
+      .then(([departmentData, stationData]) => {
+        setDepartments(departmentData || []);
+        setStations(stationData || []);
+      })
+      .catch(() => {});
   }, []);
 
   const isITRole = useMemo(() => ['admin', 'manager', 'it'].includes(currentRole), [currentRole]);
@@ -358,22 +368,30 @@ const Settings = () => {
 
             <div className="form-group">
               <label className="form-label">Station</label>
-              <input
-                type="text"
+              <select
                 className="form-input"
                 value={accountInfo.station}
                 onChange={(e) => setAccountInfo({ ...accountInfo, station: e.target.value })}
-              />
+              >
+                <option value="">Select station</option>
+                {optionsWithFallback(stations, accountInfo.station).map((station) => (
+                  <option key={station.id} value={station.name}>{station.name}</option>
+                ))}
+              </select>
             </div>
 
             <div className="form-group">
               <label className="form-label">Department</label>
-              <input
-                type="text"
+              <select
                 className="form-input"
                 value={accountInfo.department}
                 onChange={(e) => setAccountInfo({ ...accountInfo, department: e.target.value })}
-              />
+              >
+                <option value="">Select department</option>
+                {optionsWithFallback(departments, accountInfo.department).map((department) => (
+                  <option key={department.id} value={department.name}>{department.name}</option>
+                ))}
+              </select>
             </div>
 
             <div className="form-group">

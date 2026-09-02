@@ -194,6 +194,20 @@ export const usersAPI = {
   },
 };
 
+export const departmentAPI = {
+  list: async () => (await api.get('/departments/')).data,
+  create: async (name) => (await api.post('/departments/', { name })).data,
+  update: async (id, name) => (await api.patch(`/departments/${id}`, { name })).data,
+  remove: async (id) => api.delete(`/departments/${id}`),
+};
+
+export const stationAPI = {
+  list: async () => (await api.get('/stations/')).data,
+  create: async (name) => (await api.post('/stations/', { name })).data,
+  update: async (id, name) => (await api.patch(`/stations/${id}`, { name })).data,
+  remove: async (id) => api.delete(`/stations/${id}`),
+};
+
 export const documentAPI = {
   create: async (payload) => {
     const response = await api.post('/documents/', payload);
