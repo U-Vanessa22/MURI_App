@@ -1,44 +1,11 @@
-/* Voucher Dashboard: loading-skeleton state for StatCard, plus the same
-   accent as the admin dashboard on top of the shared "simple-*" dashboard
-   styling in dashboardConsistency.css and itdashboard.css. */
+/* Voucher Dashboard: same blue accent as the shared dashboard styling. */
 
 .voucher-dashboard {
-  --success: #10b981;
-  --success-light: #d1fae5;
+  --success: #0C5494;
+  --success-light: #e8f4fc;
 }
 
 .voucher-dashboard .simple-action-icon {
-  background: linear-gradient(135deg, #0C5494 0%, #1E4620 100%);
-}
-
-.stat-skeleton-value,
-.stat-skeleton-label,
-.skeleton-row-block {
-  display: block;
-  border-radius: 8px;
-  background: linear-gradient(90deg, #e2e8f0 25%, #edf2f7 37%, #e2e8f0 63%);
-  background-size: 400% 100%;
-  animation: simple-skeleton-shine 1.4s ease infinite;
-}
-
-.stat-skeleton-value {
-  width: 3.6rem;
-  height: 2.4rem;
-  margin-bottom: 0.6rem;
-}
-
-.stat-skeleton-label {
-  width: 5.2rem;
-  height: 0.9rem;
-  border-radius: 6px;
-}
-
-.skeleton-row-block {
-  height: 52px;
-  border-radius: 10px;
-}
-
-@keyframes simple-skeleton-shine {
-  0% { background-position: 100% 50%; }
-  100% { background-position: 0 50%; }
+  background: #e8f4fc;
+  color: #0C5494;
 }

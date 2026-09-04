@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   FaLaptop,
   FaTicketAlt,
-  FaRobot,
   FaBell,
+  FaFileContract,
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { documentAPI, reportAPI, voucherAPI } from '../../../services/api';
@@ -263,17 +263,65 @@ const ITDashboard = () => {
   }
 
   const notificationButton = (
-    <button
-      className="simple-icon-btn"
-      aria-label="Toggle notifications"
-      onClick={() => setShowNotifications((prev) => !prev)}
-      type="button"
-    >
-      <FaBell aria-hidden="true" />
-      {unreadNotifications.length > 0 && (
-        <span className="notification-badge">{unreadNotifications.length}</span>
+    <div className="simple-notification-wrapper">
+      <button
+        className="simple-icon-btn"
+        aria-label="Toggle notifications"
+        onClick={() => setShowNotifications((prev) => !prev)}
+        type="button"
+      >
+        <FaBell aria-hidden="true" />
+        {unreadNotifications.length > 0 && (
+          <span className="notification-badge">{unreadNotifications.length}</span>
+        )}
+      </button>
+
+      {showNotifications && (
+        <div className="simple-notification-panel simple-notification-panel-visible">
+          <div className="simple-notification-header">
+            <h4>Notifications</h4>
+            {unreadNotifications.length > 0 && (
+              <button
+                type="button"
+                className="mark-all-btn"
+                onClick={handleMarkAllNotificationsRead}
+              >
+                Mark all as read
+              </button>
+            )}
+          </div>
+          {unreadNotifications.length > 0 ? (
+            unreadNotifications.map((notification, index) => (
+              <div
+                key={notification.id}
+                className={`notification-item ${notification.is_read ? 'is-read' : 'is-unread'}`}
+                style={{ animationDelay: `${Math.min(index, 6) * 0.05}s` }}
+              >
+                <div className="notification-text">{formatNotificationMessage(notification)}</div>
+                <div className="notification-actions-row">
+                  <button
+                    type="button"
+                    className="view-ticket-btn"
+                    onClick={() => handleViewNotification(notification)}
+                  >
+                    View
+                  </button>
+                  <button
+                    type="button"
+                    className="mark-single-btn"
+                    onClick={() => handleMarkNotificationRead(notification.id)}
+                  >
+                    Mark as read
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="notifications-empty">No new notifications</p>
+          )}
+        </div>
       )}
-    </button>
+    </div>
   );
 
   return (
@@ -304,224 +352,79 @@ const ITDashboard = () => {
         {/* Main Content */}
         <main className="simple-main">
           <TopNavbar title="Dashboard" rightExtra={notificationButton} />
-          {showNotifications && (
-            <div className="simple-notification-panel simple-notification-panel-visible">
-              <div className="simple-notification-header">
-                <h4>Notifications</h4>
-                {unreadNotifications.length > 0 && (
-                  <button
-                    type="button"
-                    className="mark-all-btn"
-                    onClick={handleMarkAllNotificationsRead}
-                  >
-                    Mark all as read
-                  </button>
-                )}
-              </div>
-              {unreadNotifications.length > 0 ? (
-                unreadNotifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`notification-item ${notification.is_read ? 'is-read' : 'is-unread'}`}
-                  >
-                    <div className="notification-text">{formatNotificationMessage(notification)}</div>
-                    <div className="notification-actions-row">
-                      <button
-                        type="button"
-                        className="view-ticket-btn"
-                        onClick={() => handleViewNotification(notification)}
-                      >
-                        View
-                      </button>
-                      <button
-                        type="button"
-                        className="mark-single-btn"
-                        onClick={() => handleMarkNotificationRead(notification.id)}
-                      >
-                        Mark as read
-                      </button>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="notifications-empty">No new notifications</p>
-              )}
-            </div>
-          )}
           <div className="simple-dashboard-content">
-          {/* Welcome Section */}
-          <section className="simple-welcome">
-            <h1>Welcome back, {user.full_name || user.username || 'User'}!</h1>
-            <div className="welcome-subtitle">
-              <p>Here's what's happening with your assets today.</p>
-              {user.department && user.station && (
-                <div className="user-context">
-                  <span className="context-badge">{user.department}</span>
-                  <span className="context-badge">{user.station}</span>
-                </div>
-              )}
-            </div>
-          </section>
+          <div className="it-glass-shell">
+            <header className="it-glass-hero">
+              <div>
+                <span className="it-eyebrow">Operations workspace</span>
+                <h1>Welcome back, {user.full_name || user.username || 'User'}.</h1>
+                <p>Monitor support flow, team capacity, and documents from one quiet workspace.</p>
+              </div>
+              <div className="it-hero-context">
+                <span className="it-live-dot" /> Cooking
+                {user.department && <strong>{user.department}</strong>}
+              </div>
+            </header>
 
-          {/* Stats Section */}
-          <section className="simple-stats-section">
-            {dataError && (
-              <div className="simple-data-error" style={{ marginBottom: '10px', color: '#b91c1c' }}>
-                {dataError}
-              </div>
-            )}
-            <div className="simple-stats-grid">
-              <div className="simple-stat-card">
-                <div className="simple-stat-value">{stats.totalAssets}</div>
-                <div className="simple-stat-label">Total Assets</div>
-              </div>
-              <div className="simple-stat-card">
-                <div className="simple-stat-value">{stats.activeTickets}</div>
-                <div className="simple-stat-label">Active Tickets</div>
-              </div>
-              <div className="simple-stat-card">
-                <div className="simple-stat-value">{stats.resolved}</div>
-                <div className="simple-stat-label">Resolved</div>
-              </div>
-              <div className="simple-stat-card">
-                <div className="simple-stat-value">{stats.pending}</div>
-                <div className="simple-stat-label">Pending</div>
-              </div>
-            </div>
-          </section>
+            {dataError && <div className="it-glass-error">{dataError}</div>}
 
-          <section className="simple-stats-section">
-            <h2 className="simple-section-title">Document Signature Workflow</h2>
-            <div className="simple-stats-grid simple-document-stats">
-              <div className="simple-stat-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/document')}>
-                <div className="simple-stat-value">{documentQueue.receiving}</div>
-                <div className="simple-stat-label">Receiving Documents</div>
-              </div>
-              <div className="simple-stat-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/document')}>
-                <div className="simple-stat-value">{documentQueue.pendingSignatures}</div>
-                <div className="simple-stat-label">Pending User Signatures</div>
-              </div>
-              <div className="simple-stat-card" style={{ cursor: 'pointer' }} onClick={() => navigate('/document')}>
-                <div className="simple-stat-value">{documentQueue.signedReturned}</div>
-                <div className="simple-stat-label">Signed and Returned to IT</div>
-              </div>
-            </div>
-          </section>
+            <section className="it-metric-grid" aria-label="IT metrics">
+              <button type="button" className="it-glass-card it-metric-card it-metric-feature" onClick={() => navigate('/data-assets')}>
+                <span className="it-card-kicker">Inventory</span>
+                <strong>{stats.totalAssets}</strong>
+                <span>Total assets</span>
+                <FaLaptop aria-hidden="true" />
+              </button>
+              <button type="button" className="it-glass-card it-metric-card" onClick={() => navigate('/voucher')}>
+                <span className="it-card-kicker">Queue today</span>
+                <strong>{stats.activeTickets}</strong>
+                <span>Active tickets</span>
+                <FaTicketAlt aria-hidden="true" />
+              </button>
+              <button type="button" className="it-glass-card it-metric-card" onClick={() => navigate('/document')}>
+                <span className="it-card-kicker">Documents</span>
+                <strong>{documentQueue.pendingSignatures}</strong>
+                <span>Awaiting signatures</span>
+                <FaFileContract aria-hidden="true" />
+              </button>
+            </section>
 
-          {/* Quick Actions */}
-          <section className="simple-actions-section">
-            <h2 className="simple-section-title">Quick Actions</h2>
-            <div className="simple-actions-grid">
-              <div
-                className="simple-action-card"
-                onClick={() => navigate('/data-assets')}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="simple-action-icon">
-                  <FaLaptop />
-                </div>
-                <h3>My Assets</h3>
-                <p>View and manage your assigned assets</p>
-              </div>
-
-              <div
-                className="simple-action-card"
-                onClick={() => navigate('/voucher')}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="simple-action-icon">
-                  <FaTicketAlt />
-                </div>
-                <h3>Submit Request</h3>
-                <p>Create a new support ticket</p>
-              </div>
-
-              <div
-                className="simple-action-card"
-                onClick={() => navigate('/voucher?filter=my-tickets')}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="simple-action-icon">
-                  <FaTicketAlt />
-                </div>
-                <h3>My Tickets</h3>
-                <p>Check your ticket status</p>
-              </div>
-
-              <div
-                className="simple-action-card"
-                onClick={() => navigate('/chatbot')}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className="simple-action-icon">
-                  <FaRobot />
-                </div>
-                <h3>AI Chatbot</h3>
-                <p>Get instant help from our AI</p>
-              </div>
-            </div>
-          </section>
-
-          <section className="simple-activity-section">
-            <h2 className="simple-section-title">IT Workload Board</h2>
-            {workloadBoard.length === 0 && <p>No active IT personnel detected.</p>}
-            {workloadBoard.length > 0 && (
-              <div style={{ display: 'grid', gap: '10px' }}>
-                {workloadBoard.map((member) => (
-                  <div
-                    key={member.user_id}
-                    className="simple-activity-item"
-                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                  >
-                    <div>
-                      <h4>{member.email}</h4>
-                      <p className="simple-activity-time">IT Personnel #{member.user_id}</p>
-                    </div>
-                    <div style={{ fontWeight: 700 }}>
-                      {member.active_tickets} active tickets
-                    </div>
+            <div className="it-glass-content-grid">
+              <main className="it-glass-main-column">
+                <section className="it-glass-card it-chart-card">
+                  <div className="it-panel-heading"><div><span className="it-card-kicker">Ticket flow</span><h2>Queue overview</h2></div><span className="it-panel-total">{queueSnapshot.open + queueSnapshot.assigned + queueSnapshot.in_progress} active</span></div>
+                  <div className="it-bar-chart" aria-label="Ticket queue overview">
+                    {[['Open', queueSnapshot.open], ['Assigned', queueSnapshot.assigned], ['In progress', queueSnapshot.in_progress], ['Resolved', queueSnapshot.resolved], ['Closed', queueSnapshot.closed]].map(([label, value]) => {
+                      const maxQueue = Math.max(queueSnapshot.open, queueSnapshot.assigned, queueSnapshot.in_progress, queueSnapshot.resolved, queueSnapshot.closed, 1);
+                      return <div className="it-bar-item" key={label}><div className="it-bar-label"><span>{label}</span><strong>{value}</strong></div><div className="it-bar-track"><span style={{ width: `${Math.max((value / maxQueue) * 100, value ? 8 : 0)}%` }} /></div></div>;
+                    })}
                   </div>
-                ))}
-              </div>
-            )}
+                </section>
 
-            <div className="simple-stats-grid" style={{ marginTop: '12px' }}>
-              <div className="simple-stat-card">
-                <div className="simple-stat-value">{queueSnapshot.open}</div>
-                <div className="simple-stat-label">Open Queue</div>
-              </div>
-              <div className="simple-stat-card">
-                <div className="simple-stat-value">{queueSnapshot.assigned}</div>
-                <div className="simple-stat-label">Assigned Queue</div>
-              </div>
-              <div className="simple-stat-card">
-                <div className="simple-stat-value">{queueSnapshot.in_progress}</div>
-                <div className="simple-stat-label">In Progress Queue</div>
-              </div>
-            </div>
-          </section>
-
-          {/* Recent Activity */}
-          <section className="simple-activity-section">
-            <h2 className="simple-section-title">Recent Activity</h2>
-            <div className="simple-activity-list">
-              {recentActivity.length === 0 && <p>No ticket activity yet.</p>}
-              {recentActivity.map((item) => (
-                <div key={item.id} className="simple-activity-item">
-                  <div className="simple-activity-text">
-                    <div className="simple-activity-icon">{item.icon}</div>
-                    <div>
-                      <h4>{item.title}</h4>
-                      <p className="simple-activity-time">{item.time}</p>
-                    </div>
+                <section className="it-glass-card it-team-card">
+                  <div className="it-panel-heading"><div><span className="it-card-kicker">Team capacity</span><h2>Employee workload</h2></div><button type="button" onClick={() => navigate('/report')}>View report</button></div>
+                  <div className="it-team-list">
+                    {workloadBoard.length === 0 && <p className="it-empty-state">No active IT personnel detected.</p>}
+                    {workloadBoard.map((member, index) => <div className="it-team-row" key={member.user_id}><span className="it-avatar">{(member.email || 'IT').slice(0, 2).toUpperCase()}</span><div className="it-team-person"><strong>{member.email}</strong><span>IT Personnel #{member.user_id}</span></div><div className="it-team-load"><span>{member.active_tickets} active</span><div><i style={{ width: `${Math.min(member.active_tickets * 12 + 12, 100)}%` }} /></div></div><span className="it-rank">0{index + 1}</span></div>)}
                   </div>
-                </div>
-              ))}
+                </section>
+
+                <section className="it-glass-card it-employee-table-card">
+                  <div className="it-panel-heading"><div><span className="it-card-kicker">Service desk</span><h2>Employee activity</h2></div><button type="button" onClick={() => navigate('/voucher')}>Open tickets</button></div>
+                  <div className="it-employee-table-wrap"><table className="it-employee-table"><thead><tr><th>Employee</th><th>Latest activity</th><th>State</th><th>Action</th></tr></thead><tbody>{recentActivity.slice(0, 5).map((item) => <tr key={item.id}><td><span className="it-table-avatar">{item.title.slice(0, 2)}</span><strong>{item.title}</strong></td><td>{item.time}</td><td><span className="it-state-pill">Active</span></td><td><button type="button" onClick={() => navigate(`/voucher?ticket=${encodeURIComponent(item.title.split(' • ')[0])}`)}>Review</button></td></tr>)}</tbody></table>{recentActivity.length === 0 && <p className="it-empty-state">No ticket activity yet.</p>}</div>
+                </section>
+              </main>
+
+              <aside className="it-glass-right-rail">
+                <section className="it-glass-card it-meeting-card"><div className="it-panel-heading"><div><span className="it-card-kicker">Next up</span><h2>Upcoming work</h2></div><FaBell aria-hidden="true" /></div><div className="it-meeting-time">{documentQueue.pendingSignatures > 0 ? 'Action needed' : 'All clear'}</div><p>{documentQueue.pendingSignatures > 0 ? `${documentQueue.pendingSignatures} document${documentQueue.pendingSignatures === 1 ? '' : 's'} waiting for a user signature.` : 'No pending document signatures right now.'}</p><button type="button" onClick={() => navigate('/document')}>Open document queue <span>→</span></button></section>
+                <section className="it-glass-card it-format-card"><div className="it-panel-heading"><div><span className="it-card-kicker">Work modes</span><h2>Working format</h2></div></div><div className="it-format-stack"><div><span>On site</span><strong>{Math.max(workloadBoard.length - 1, 0)}</strong></div><div><span>Remote</span><strong>1</strong></div><div><span>Available</span><strong>{queueSnapshot.open}</strong></div></div><div className="it-format-bar"><span style={{ width: `${workloadBoard.length ? 68 : 0}%` }} /><span style={{ width: `${workloadBoard.length ? 22 : 0}%` }} /><span style={{ width: `${workloadBoard.length ? 10 : 0}%` }} /></div><div className="it-format-legend"><span>On site</span><span>Remote</span><span>Available</span></div></section>
+                <section className="it-glass-card it-doc-card"><span className="it-card-kicker">Document flow</span><h2>{documentQueue.receiving}</h2><p>receiving documents in the workflow</p><div className="it-doc-stats"><span><strong>{documentQueue.signedReturned}</strong> returned</span><span><strong>{documentQueue.pendingSignatures}</strong> pending</span></div></section>
+              </aside>
             </div>
-          </section>
+          </div>
 
           <footer className="simple-footer">
-            © 2026. MURI • Logged in as: {user.email}
+            ©2026. MURI. All rights reserved.
           </footer>
           </div>
         </main>

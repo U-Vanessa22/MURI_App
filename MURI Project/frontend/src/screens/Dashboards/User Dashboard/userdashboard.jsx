@@ -210,7 +210,7 @@ const UserDashboard = () => {
           </section>
 
           <footer className="simple-footer">
-            © 2026. ASM - Asset Management System • Logged in as: {user.email}
+            ©2026. MURI. All rights reserved.
           </footer>
           </div>
         </main>

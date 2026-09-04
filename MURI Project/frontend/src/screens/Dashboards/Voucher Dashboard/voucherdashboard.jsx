@@ -6,23 +6,14 @@ import { useAuth } from '../../../contexts/AuthContext';
 import UnifiedSidebar from '../../../components/layout/UnifiedSidebar';
 import TopNavbar from '../../../components/layout/TopNavbar';
 
-const StatCard = ({ loading, value, label, onClick }) => (
+const StatCard = ({ value, label, onClick }) => (
   <div
     className="simple-stat-card"
-    style={onClick && !loading ? { cursor: 'pointer' } : undefined}
-    onClick={loading ? undefined : onClick}
+    style={onClick ? { cursor: 'pointer' } : undefined}
+    onClick={onClick}
   >
-    {loading ? (
-      <>
-        <span className="stat-skeleton-value" aria-hidden="true" />
-        <span className="stat-skeleton-label" aria-hidden="true" />
-      </>
-    ) : (
-      <>
-        <div className="simple-stat-value">{value}</div>
-        <div className="simple-stat-label">{label}</div>
-      </>
-    )}
+    <div className="simple-stat-value">{value}</div>
+    <div className="simple-stat-label">{label}</div>
   </div>
 );
 
@@ -31,7 +22,6 @@ const VoucherDashboard = () => {
   const { user } = useAuth();
   const [assets, setAssets] = useState([]);
   const [vouchers, setVouchers] = useState([]);
-  const [dataLoading, setDataLoading] = useState(true);
   const [dataError, setDataError] = useState('');
 
   // Check authentication on component mount, matching the other dashboards.
@@ -60,8 +50,6 @@ const VoucherDashboard = () => {
         setVouchers(voucherData || []);
       } catch (error) {
         setDataError(error?.response?.data?.detail || 'Failed to load dashboard data');
-      } finally {
-        setDataLoading(false);
       }
     };
 
@@ -136,25 +124,21 @@ const VoucherDashboard = () => {
               <h2 className="simple-section-title">Dashboard Overview</h2>
               <div className="simple-stats-grid">
                 <StatCard
-                  loading={dataLoading}
                   value={stats.total}
                   label="Total Vouchers"
                   onClick={() => navigate('/asset-issuance')}
                 />
                 <StatCard
-                  loading={dataLoading}
                   value={stats.currentlyIssued}
                   label="Currently Issued"
                   onClick={() => navigate('/asset-issuance')}
                 />
                 <StatCard
-                  loading={dataLoading}
                   value={stats.returned}
                   label="Returned Vouchers"
                   onClick={() => navigate('/asset-issuance')}
                 />
                 <StatCard
-                  loading={dataLoading}
                   value={stats.availableAssets}
                   label="Available Assets"
                   onClick={() => navigate('/data-assets')}
@@ -220,11 +204,8 @@ const VoucherDashboard = () => {
             <section className="simple-activity-section">
               <h2 className="simple-section-title">Recent Issuance Activity</h2>
               <div className="simple-activity-list">
-                {dataLoading && [0, 1, 2].map((key) => (
-                  <div key={key} className="simple-activity-item skeleton-row-block" />
-                ))}
-                {!dataLoading && recentActivity.length === 0 && <p>No voucher activity yet.</p>}
-                {!dataLoading && recentActivity.map((item) => (
+                {recentActivity.length === 0 && <p>No voucher activity yet.</p>}
+                {recentActivity.map((item) => (
                   <div key={item.id} className="simple-activity-item">
                     <div className="simple-activity-text">
                       <div className="simple-activity-icon">{item.icon}</div>
@@ -239,7 +220,7 @@ const VoucherDashboard = () => {
             </section>
 
             <footer className="simple-footer">
-              © 2026. MURI • Logged in as: {user.email}
+              ©2026. MURI. All rights reserved.
             </footer>
           </div>
         </main>

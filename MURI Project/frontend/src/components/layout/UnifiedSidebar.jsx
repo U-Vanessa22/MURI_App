@@ -49,7 +49,7 @@ const UnifiedSidebar = ({ activePath }) => {
         { name: 'Users', icon: FaUsers, path: '/admin/users' },
         { name: 'Departments & Stations', icon: FaBuilding, path: '/admin/departments-stations' },
         { name: 'Assets', icon: FaBoxOpen, path: '/data-assets' },
-        { name: 'Vouchers', icon: FaExchangeAlt, path: '/asset-issuance' },
+        { name: 'Logistics', icon: FaExchangeAlt, path: '/asset-issuance' },
         { name: 'Disposal', icon: FaHeadset, path: '/disposal' },
         { name: 'Documents', icon: FaFileContract, path: '/document' },
         { name: 'Reports', icon: FaChartBar, path: '/report' },
@@ -60,7 +60,7 @@ const UnifiedSidebar = ({ activePath }) => {
         { name: 'Dashboard', icon: FaHome, path: dashboardPath },
         { name: 'Tickets', icon: FaTicketAlt, path: '/voucher' },
         { name: 'Assets', icon: FaBoxOpen, path: '/data-assets' },
-        { name: 'Vouchers', icon: FaExchangeAlt, path: '/asset-issuance' },
+        { name: 'Logistics', icon: FaExchangeAlt, path: '/asset-issuance' },
         { name: 'Disposal', icon: FaHeadset, path: '/disposal' },
         { name: 'Documents', icon: FaFileContract, path: '/document' },
         { name: 'Reports', icon: FaChartBar, path: '/report' },
@@ -69,7 +69,7 @@ const UnifiedSidebar = ({ activePath }) => {
     : isVoucher
     ? [
         { name: 'Dashboard', icon: FaHome, path: dashboardPath },
-        { name: 'Vouchers', icon: FaExchangeAlt, path: '/asset-issuance' },
+        { name: 'Logistics', icon: FaExchangeAlt, path: '/asset-issuance' },
         { name: 'Assets', icon: FaBoxOpen, path: '/data-assets' },
         { name: 'Documents', icon: FaFileContract, path: '/document' },
         { name: 'Reports', icon: FaChartBar, path: '/report' },

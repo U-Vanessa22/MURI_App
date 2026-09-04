@@ -12,7 +12,7 @@ const DropdownSelect = ({ value, onChange, options, placeholder = 'Select an opt
   const selectedOption = options.find((option) => option.value === value);
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button
           type="button"
@@ -28,7 +28,7 @@ const DropdownSelect = ({ value, onChange, options, placeholder = 'Select an opt
         {options.map((option) => (
           <DropdownMenuItem
             key={option.value}
-            onSelect={() => onChange(option.value)}
+            onSelect={() => onChange({ target: { value: option.value } })}
             className={option.value === value ? 'muri-dropdown-item-selected' : ''}
           >
             {option.label}

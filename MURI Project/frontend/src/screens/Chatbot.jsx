@@ -10,21 +10,6 @@ export default function ChatbotPage() {
   const [isSending, setIsSending] = useState(false);
   const [draftReply, setDraftReply] = useState('');
 
-  const faqItems = [
-    {
-      issue: 'Screen is broken:',
-      solution: 'Report direct to the DM and to the ICT Personnel'
-    },
-    {
-      issue: 'Mouse not working:',
-      solution: 'Check a key on the keyboard'
-    },
-    {
-      issue: 'System Down:',
-      solution: 'Direct Communicating to the IT Personnel'
-    }
-  ];
-
   const sendToBot = async (questionText) => {
     try {
       setIsSending(true);
@@ -60,16 +45,6 @@ export default function ChatbotPage() {
     }
   };
 
-  const handleFaqClick = async (faq) => {
-    const question = faq.issue.replace(':', '');
-    setMessages(prev => [...prev, {
-      text: question,
-      sender: 'user',
-      time: new Date(),
-    }]);
-    await sendToBot(question);
-  };
-
   return (
     <div className="chatbot-container">
       <UnifiedSidebar activePath="/chatbot" />
@@ -79,41 +54,6 @@ export default function ChatbotPage() {
         <TopNavbar title="Chatbot" />
 
         <div className="content-wrapper">
-          {/* FAQ Section */}
-          <section className="faq-section">
-            <div className="faq-header">
-              <div className="faq-illustration">
-                <svg width="400" height="150" viewBox="0 0 400 150">
-                  <ellipse cx="120" cy="60" rx="80" ry="50" fill="#0C5494" opacity="0.9"/>
-                  <text x="80" y="70" fill="white" fontSize="16" fontWeight="600">FREQUENTLY</text>
-
-                  <ellipse cx="280" cy="60" rx="80" ry="50" fill="#2c3e50" opacity="0.95"/>
-                  <text x="240" y="70" fill="white" fontSize="16" fontWeight="600">QUESTIONS</text>
-
-                  <ellipse cx="200" cy="90" rx="70" ry="45" fill="#1a252f" opacity="0.95"/>
-                  <text x="170" y="100" fill="white" fontSize="16" fontWeight="600">ASKED</text>
-                </svg>
-              </div>
-            </div>
-            
-            <div className="faq-list">
-              {faqItems.map((faq, index) => (
-                <div 
-                  key={index} 
-                  className="faq-item"
-                  onClick={() => handleFaqClick(faq)}
-                >
-                  <span className="faq-issue">{faq.issue}</span>
-                  <span className="faq-solution">{faq.solution}</span>
-                </div>
-              ))}
-            </div>
-
-            <button className="ask-question-btn">
-              Explore support topics
-            </button>
-          </section>
-
           {/* Chat Section */}
           <section className="chat-section">
             <div className="chat-messages">

@@ -69,24 +69,22 @@ const LookupList = ({ title, items, onCreate, onUpdate, onDelete }) => {
   };
 
   return (
-    <div style={{ flex: 1, minWidth: 240 }}>
-      <h4 style={{ margin: '0 0 8px' }}>{title}</h4>
-      {error && <div className="modal-error" style={{ marginBottom: 8 }}>{error}</div>}
+    <section className="lookup-editor-card">
+      <h2 className="lookup-editor-title">{title}</h2>
+      {error && <div className="admin-users-message error lookup-editor-error">{error}</div>}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10, maxHeight: 240, overflowY: 'auto' }}>
-        {items.length === 0 && <p className="field-hint">None yet.</p>}
+      <div className="lookup-editor-list">
+        {items.length === 0 && <p className="lookup-editor-empty">No {title.toLowerCase()} added yet.</p>}
         {items.map((item) => (
-          <div
-            key={item.id}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, border: '1px solid #e2e8f0', borderRadius: 6, padding: '6px 8px' }}
-          >
+          <div key={item.id} className="lookup-editor-row">
             {editingId === item.id ? (
               <>
                 <input
                   type="text"
                   value={editingName}
                   onChange={(e) => setEditingName(e.target.value)}
-                  style={{ flex: 1 }}
+                  className="lookup-editor-input"
+                  aria-label={`Edit ${title.toLowerCase()}`}
                   autoFocus
                 />
                 <button type="button" className="row-action-btn" disabled={busy} onClick={() => saveEdit(item)}>Save</button>
@@ -94,7 +92,7 @@ const LookupList = ({ title, items, onCreate, onUpdate, onDelete }) => {
               </>
             ) : (
               <>
-                <span style={{ flex: 1 }}>{item.name}</span>
+                <span className="lookup-editor-name">{item.name}</span>
                 <button type="button" className="row-action-btn" disabled={busy} onClick={() => startEdit(item)}>
                   <FaPen />
                 </button>
@@ -107,10 +105,12 @@ const LookupList = ({ title, items, onCreate, onUpdate, onDelete }) => {
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: 6 }}>
+      <div className="lookup-editor-create">
         <input
           type="text"
+          className="lookup-editor-input"
           placeholder={`New ${title.toLowerCase().replace(/s$/, '')}`}
+          aria-label={`New ${title.toLowerCase().replace(/s$/, '')}`}
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
@@ -120,7 +120,7 @@ const LookupList = ({ title, items, onCreate, onUpdate, onDelete }) => {
           <FaPlus /> Add
         </button>
       </div>
-    </div>
+    </section>
   );
 };
 

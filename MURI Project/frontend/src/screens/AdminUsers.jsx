@@ -1,16 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { ChevronDown } from '@untitledui/icons';
 import { useNavigate } from 'react-router-dom';
 import {
   FaBuilding,
   FaSearch,
   FaTimes,
   FaPlus,
-  FaPen,
-  FaKey,
-  FaToggleOn,
-  FaToggleOff,
-  FaTrash,
 } from 'react-icons/fa';
+import { Button } from '../components/base/buttons/button';
+import { Dropdown } from '../components/base/dropdown/dropdown';
 import UnifiedSidebar from '../components/layout/UnifiedSidebar';
 import TopNavbar from '../components/layout/TopNavbar';
 import { useAuth } from '../contexts/AuthContext';
@@ -386,29 +384,41 @@ const AdminUsers = () => {
                             </span>
                           </td>
                           <td className="admin-users-actions">
-                            <button type="button" className="row-action-btn" onClick={() => openEditModal(user)}>
-                              <FaPen /> Edit
-                            </button>
-                            <button type="button" className="row-action-btn" onClick={() => openResetModal(user)}>
-                              <FaKey /> Reset PW
-                            </button>
-                            <button
-                              type="button"
-                              className="row-action-btn"
-                              onClick={() => handleToggleStatus(user)}
-                              disabled={user.id === currentUserId}
-                            >
-                              {user.is_active ? <FaToggleOff /> : <FaToggleOn />}
-                              {user.is_active ? 'Deactivate' : 'Activate'}
-                            </button>
-                            <button
-                              type="button"
-                              className="row-action-btn danger"
-                              onClick={() => openDeleteModal(user)}
-                              disabled={user.id === currentUserId}
-                            >
-                              <FaTrash /> Delete
-                            </button>
+                            <Dropdown.Root>
+                              <Button
+                                type="button"
+                                size="sm"
+                                color="secondary"
+                                iconTrailing={ChevronDown}
+                                className="group user-actions-button *:data-icon:size-4 *:data-icon:stroke-[2.25px]!"
+                              >
+                                Actions
+                              </Button>
+                              <Dropdown.Popover className="w-54">
+                                <Dropdown.Menu>
+                                  <Dropdown.Section>
+                                    <Dropdown.Item onAction={() => openEditModal(user)}>Edit</Dropdown.Item>
+                                    <Dropdown.Item onAction={() => openResetModal(user)}>Reset password</Dropdown.Item>
+                                    <Dropdown.Item
+                                      isDisabled={user.id === currentUserId}
+                                      onAction={() => handleToggleStatus(user)}
+                                    >
+                                      {user.is_active ? 'Deactivate' : 'Activate'}
+                                    </Dropdown.Item>
+                                  </Dropdown.Section>
+                                  <Dropdown.Separator />
+                                  <Dropdown.Section>
+                                    <Dropdown.Item
+                                      className="user-action-delete"
+                                      isDisabled={user.id === currentUserId}
+                                      onAction={() => openDeleteModal(user)}
+                                    >
+                                      Delete
+                                    </Dropdown.Item>
+                                  </Dropdown.Section>
+                                </Dropdown.Menu>
+                              </Dropdown.Popover>
+                            </Dropdown.Root>
                           </td>
                         </tr>
                       ))

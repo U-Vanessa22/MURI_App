@@ -40,7 +40,7 @@ const DepartmentsStations = () => {
 
               {loadError && <div className="admin-users-message error">{loadError}</div>}
 
-              <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+              <div className="lookup-editor-grid">
                 <LookupList
                   title="Departments"
                   items={departments}

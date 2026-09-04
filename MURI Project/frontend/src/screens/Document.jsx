@@ -24,6 +24,7 @@ const Document = () => {
   const normalizedRole = (user?.role || '').toLowerCase();
   const canApproveDocuments = normalizedRole === 'it';
   const canManageDocuments = ['admin', 'manager', 'it'].includes(normalizedRole);
+  const formatStatusLabel = (value) => (value || '').replace(/_/g, ' ');
   const [activeTab, setActiveTab] = useState('new'); // 'new', 'drafts', 'submitted'
   const [itQueueFilter, setItQueueFilter] = useState('all');
   const [formData, setFormData] = useState({
@@ -919,7 +920,7 @@ const Document = () => {
                           {doc.approvalStatus || 'pending'}
                         </span>
                         <span className={`signature-badge signature-${(doc.signatureStatus || 'not_required').replace(/\s+/g, '-').toLowerCase()}`}>
-                          {doc.signatureStatus || 'not_required'}
+                          {formatStatusLabel(doc.signatureStatus || 'not_required')}
                         </span>
                         {doc.disposalId && <span className="linked-disposal">From Disposal #{doc.disposalId}</span>}
                       </div>
@@ -1115,7 +1116,7 @@ const Document = () => {
                     <div className="preview-row">
                       <span className="preview-label">Signature Status:</span>
                       <span className={`signature-badge signature-${(selectedDoc.signatureStatus || 'not_required').replace(/\s+/g, '-').toLowerCase()}`}>
-                        {selectedDoc.signatureStatus || 'not_required'}
+                        {formatStatusLabel(selectedDoc.signatureStatus || 'not_required')}
                       </span>
                     </div>
                     <div className="preview-row">
@@ -1177,8 +1178,8 @@ const Document = () => {
 
         {/* Footer */}
         <footer className="document-footer">
-          <p>© {new Date().getFullYear()} ASM. All rights reserved.</p>
-          <p className="footer-version">Version 1.0.0</p>
+          <p>©2026. MURI. All rights reserved.</p>
+          
         </footer>
       </div>
     </div>

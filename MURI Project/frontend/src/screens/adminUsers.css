@@ -20,6 +20,104 @@
   font-size: 16px;
 }
 
+.lookup-editor-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: stretch;
+}
+
+.lookup-editor-card {
+  min-width: 0;
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #e1e7ef;
+  border-radius: 14px;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+}
+
+.lookup-editor-title {
+  margin: 0 0 14px;
+  color: #172033;
+  font-size: 18px;
+  font-weight: 750;
+}
+
+.lookup-editor-error {
+  margin-bottom: 12px;
+}
+
+.lookup-editor-list {
+  display: flex;
+  min-height: 88px;
+  max-height: 260px;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+  overflow-y: auto;
+}
+
+.lookup-editor-row {
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px;
+  border: 1px solid #dbe3ee;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.lookup-editor-name {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  color: #243447;
+  font-size: 14px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lookup-editor-input {
+  min-width: 0;
+  flex: 1;
+  padding: 9px 11px;
+  border: 1px solid #b8c7d9;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #172033;
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+.lookup-editor-input::placeholder {
+  color: #8291a5;
+}
+
+.lookup-editor-input:focus {
+  border-color: #0c5494;
+  box-shadow: 0 0 0 3px rgba(12, 84, 148, 0.12);
+}
+
+.lookup-editor-create {
+  display: flex;
+  gap: 8px;
+}
+
+.lookup-editor-empty {
+  margin: auto 0;
+  color: #8291a5;
+  font-size: 13px;
+}
+
+@media (max-width: 700px) {
+  .lookup-editor-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .admin-users-message {
   padding: 10px 14px;
   border-radius: 8px;
@@ -29,8 +127,8 @@
 }
 
 .admin-users-message.success {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: #e8f4fc;
+  color: #0C5494;
 }
 
 .admin-users-message.error {
@@ -97,7 +195,7 @@
   padding: 11px 20px;
   border: none;
   border-radius: 8px;
-  background: #27ae60;
+  background: #0C5494;
   color: white;
   font-size: 14px;
   font-weight: 600;
@@ -107,9 +205,9 @@
 }
 
 .admin-users-add-btn:hover {
-  background: #219653;
+  background: #0a4278;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
+  box-shadow: 0 4px 12px rgba(12, 84, 148, 0.2);
 }
 
 .admin-users-table-container {
@@ -173,8 +271,8 @@
 }
 
 .status-pill.status-active {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: #e8f4fc;
+  color: #0C5494;
 }
 
 .status-pill.status-inactive {
@@ -186,6 +284,10 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.user-actions-button {
+  min-width: 92px;
 }
 
 .row-action-btn {

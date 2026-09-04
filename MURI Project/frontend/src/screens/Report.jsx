@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import UnifiedSidebar from '../components/layout/UnifiedSidebar';
 import TopNavbar from '../components/layout/TopNavbar';
+import DropdownSelect from '../components/ui/dropdown-select';
 import { reportAPI, voucherAPI } from '../services/api';
 
 export default function ReportPage() {
@@ -198,32 +199,34 @@ export default function ReportPage() {
           <div className="filter-bar">
             <div className="filter-group">
               <Filter size={18} />
-              <select 
+              <DropdownSelect
                 className="filter-select"
                 value={selectedPeriod}
                 onChange={(e) => setSelectedPeriod(e.target.value)}
-              >
-                <option value="today">Today</option>
-                <option value="week">This Week</option>
-                <option value="month">This Month</option>
-                <option value="year">This Year</option>
-              </select>
+                options={[
+                  { value: 'today', label: 'Today' },
+                  { value: 'week', label: 'This Week' },
+                  { value: 'month', label: 'This Month' },
+                  { value: 'year', label: 'This Year' },
+                ]}
+              />
             </div>
             
             <div className="filter-group">
               <Calendar size={18} />
-              <select 
+              <DropdownSelect
                 className="filter-select"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-              >
-                <option value="all">All Statuses</option>
-                <option value="open">Open</option>
-                <option value="assigned">Assigned</option>
-                <option value="in_progress">In Progress</option>
-                <option value="resolved">Resolved</option>
-                <option value="closed">Closed</option>
-              </select>
+                options={[
+                  { value: 'all', label: 'All Statuses' },
+                  { value: 'open', label: 'Open' },
+                  { value: 'assigned', label: 'Assigned' },
+                  { value: 'in_progress', label: 'In Progress' },
+                  { value: 'resolved', label: 'Resolved' },
+                  { value: 'closed', label: 'Closed' },
+                ]}
+              />
             </div>
 
             <button className="export-btn" onClick={handleExport}>
@@ -300,8 +303,7 @@ export default function ReportPage() {
                 <h2 className="chart-title">Ticket Volume Trend</h2>
                 <p className="chart-subtitle">Monthly ticket statistics</p>
               </div>
-              <div className="chart-content">
-                <div className="bar-chart">
+            <div className="chart-content">
                   {performanceData.map((item, index) => (
                     <div key={index} className="bar-item">
                       <div 
@@ -314,8 +316,8 @@ export default function ReportPage() {
                       <span className="bar-label">{item.month}</span>
                     </div>
                   ))}
-                </div>
               </div>
+              
             </div>
 
             {/* Category Distribution */}
@@ -421,7 +423,7 @@ export default function ReportPage() {
         </div>
 
         <footer className="footer">
-          <p>© 2024 ASM. All rights reserved.</p>
+          <p>©2026. MURI. All rights reserved.</p>
         </footer>
       </main>
     </div>

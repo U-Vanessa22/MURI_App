@@ -137,8 +137,8 @@
    top margin from cancelling padding the way it does on pages that scroll via
    the document instead), matching every other page. */
 .setting-container .muri-topnav {
-  margin: 0 -40px 30px;
-  border-radius: 0;
+  margin: 16px 16px 30px 0;
+  border-radius: 16px;
 }
 
 .setting-header {
@@ -855,6 +855,17 @@
   border: 1px solid #dbe3f1;
   padding: 10px;
   border-radius: 8px;
+}
+
+.terms-policy-note a {
+  color: #0C5494;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.terms-policy-note a:hover {
+  color: #0a4278;
+  text-decoration: underline;
 }
 
 .setting-container.dark .terms-policy-note {

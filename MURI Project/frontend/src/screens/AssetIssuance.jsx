@@ -125,12 +125,12 @@ const AssetIssuance = () => {
       <UnifiedSidebar activePath="/asset-issuance" />
 
       <main className="main-content">
-        <TopNavbar title="Vouchers" />
+        <TopNavbar title="Logistics" />
 
         <div className="issuance-content">
           <div className="issuance-header">
             <div>
-              <h1>Vouchers</h1>
+              <h1>Logistics</h1>
               <p>Record which ICT asset was issued to a staff member, and track returns.</p>
             </div>
             <div className="issuance-header-actions">

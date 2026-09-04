@@ -10,23 +10,14 @@ const DOCUMENT_TYPES = {
   receiving: 'receiving',
 };
 
-const StatCard = ({ loading, value, label, onClick }) => (
+const StatCard = ({ value, label, onClick }) => (
   <div
     className="simple-stat-card"
-    style={onClick && !loading ? { cursor: 'pointer' } : undefined}
-    onClick={loading ? undefined : onClick}
+    style={onClick ? { cursor: 'pointer' } : undefined}
+    onClick={onClick}
   >
-    {loading ? (
-      <>
-        <span className="stat-skeleton-value" aria-hidden="true" />
-        <span className="stat-skeleton-label" aria-hidden="true" />
-      </>
-    ) : (
-      <>
-        <div className="simple-stat-value">{value}</div>
-        <div className="simple-stat-label">{label}</div>
-      </>
-    )}
+    <div className="simple-stat-value">{value}</div>
+    <div className="simple-stat-label">{label}</div>
   </div>
 );
 
@@ -63,7 +54,6 @@ const AdminDashboard = () => {
     signedReturned: 0,
   });
   const [disposalCount, setDisposalCount] = useState(0);
-  const [dataLoading, setDataLoading] = useState(true);
   const [dataError, setDataError] = useState('');
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
@@ -224,8 +214,6 @@ const AdminDashboard = () => {
         setRecentActivity(recent);
       } catch (error) {
         setDataError(error?.response?.data?.detail || 'Failed to load dashboard data');
-      } finally {
-        setDataLoading(false);
       }
     };
 
@@ -407,10 +395,10 @@ const AdminDashboard = () => {
               </div>
             )}
             <div className="simple-stats-grid">
-              <StatCard loading={dataLoading} value={stats.totalUsers} label="Total Users" onClick={() => navigate('/admin/users')} />
-              <StatCard loading={dataLoading} value={stats.activeTickets} label="Active Tickets" onClick={() => navigate('/voucher')} />
-              <StatCard loading={dataLoading} value={stats.resolved} label="Resolved" />
-              <StatCard loading={dataLoading} value={stats.pending} label="Pending" />
+              <StatCard value={stats.totalUsers} label="Total Users" onClick={() => navigate('/admin/users')} />
+              <StatCard value={stats.activeTickets} label="Active Tickets" onClick={() => navigate('/voucher')} />
+              <StatCard value={stats.resolved} label="Resolved" />
+              <StatCard value={stats.pending} label="Pending" />
             </div>
           </section>
 
@@ -418,21 +406,21 @@ const AdminDashboard = () => {
           <section className="simple-stats-section">
             <h2 className="simple-section-title">User Roster</h2>
             <div className="simple-stats-grid">
-              <StatCard loading={dataLoading} value={userRoster.admins} label="Admins" />
-              <StatCard loading={dataLoading} value={userRoster.it} label="IT Personnel" />
-              <StatCard loading={dataLoading} value={userRoster.users} label="Users" />
-              <StatCard loading={dataLoading} value={userRoster.active} label="Active Accounts" />
-              <StatCard loading={dataLoading} value={userRoster.inactive} label="Inactive Accounts" />
+              <StatCard value={userRoster.admins} label="Admins" />
+              <StatCard value={userRoster.it} label="IT Personnel" />
+              <StatCard value={userRoster.users} label="Users" />
+              <StatCard value={userRoster.active} label="Active Accounts" />
+              <StatCard value={userRoster.inactive} label="Inactive Accounts" />
             </div>
           </section>
 
           <section className="simple-stats-section">
             <h2 className="simple-section-title">Document & Disposal Workflow</h2>
             <div className="simple-stats-grid">
-              <StatCard loading={dataLoading} value={documentQueue.receiving} label="Receiving Documents" onClick={() => navigate('/document')} />
-              <StatCard loading={dataLoading} value={documentQueue.pendingSignatures} label="Pending User Signatures" onClick={() => navigate('/document')} />
-              <StatCard loading={dataLoading} value={documentQueue.signedReturned} label="Signed and Returned to IT" onClick={() => navigate('/document')} />
-              <StatCard loading={dataLoading} value={disposalCount} label="Disposal Requests" onClick={() => navigate('/disposal')} />
+              <StatCard value={documentQueue.receiving} label="Receiving Documents" onClick={() => navigate('/document')} />
+              <StatCard value={documentQueue.pendingSignatures} label="Pending User Signatures" onClick={() => navigate('/document')} />
+              <StatCard value={documentQueue.signedReturned} label="Signed and Returned to IT" onClick={() => navigate('/document')} />
+              <StatCard value={disposalCount} label="Disposal Requests" onClick={() => navigate('/disposal')} />
             </div>
           </section>
 
@@ -492,15 +480,8 @@ const AdminDashboard = () => {
 
           <section className="simple-activity-section">
             <h2 className="simple-section-title">IT Workload Board</h2>
-            {dataLoading && (
-              <div style={{ display: 'grid', gap: '10px' }}>
-                {[0, 1, 2].map((key) => (
-                  <div key={key} className="simple-activity-item skeleton-row-block" />
-                ))}
-              </div>
-            )}
-            {!dataLoading && workloadBoard.length === 0 && <p>No active IT personnel detected.</p>}
-            {!dataLoading && workloadBoard.length > 0 && (
+            {workloadBoard.length === 0 && <p>No active IT personnel detected.</p>}
+            {workloadBoard.length > 0 && (
               <div style={{ display: 'grid', gap: '10px' }}>
                 {workloadBoard.map((member) => (
                   <div
@@ -521,11 +502,11 @@ const AdminDashboard = () => {
             )}
 
             <div className="simple-stats-grid" style={{ marginTop: '12px' }}>
-              <StatCard loading={dataLoading} value={queueSnapshot.open} label="Open Queue" />
-              <StatCard loading={dataLoading} value={queueSnapshot.assigned} label="Assigned Queue" />
-              <StatCard loading={dataLoading} value={queueSnapshot.in_progress} label="In Progress Queue" />
-              <StatCard loading={dataLoading} value={queueSnapshot.resolved} label="Resolved Queue" />
-              <StatCard loading={dataLoading} value={queueSnapshot.closed} label="Closed Queue" />
+              <StatCard value={queueSnapshot.open} label="Open Queue" />
+              <StatCard value={queueSnapshot.assigned} label="Assigned Queue" />
+              <StatCard value={queueSnapshot.in_progress} label="In Progress Queue" />
+              <StatCard value={queueSnapshot.resolved} label="Resolved Queue" />
+              <StatCard value={queueSnapshot.closed} label="Closed Queue" />
             </div>
           </section>
 
@@ -533,11 +514,8 @@ const AdminDashboard = () => {
           <section className="simple-activity-section">
             <h2 className="simple-section-title">Recent System Activity</h2>
             <div className="simple-activity-list">
-              {dataLoading && [0, 1, 2].map((key) => (
-                <div key={key} className="simple-activity-item skeleton-row-block" />
-              ))}
-              {!dataLoading && recentActivity.length === 0 && <p>No ticket activity yet.</p>}
-              {!dataLoading && recentActivity.map((item) => (
+              {recentActivity.length === 0 && <p>No ticket activity yet.</p>}
+              {recentActivity.map((item) => (
                 <div key={item.id} className="simple-activity-item">
                   <div className="simple-activity-text">
                     <div className="simple-activity-icon">{item.icon}</div>
@@ -552,7 +530,7 @@ const AdminDashboard = () => {
           </section>
 
           <footer className="simple-footer">
-            © 2026. MURI • Logged in as: {user.email}
+            ©2026. MURI. All rights reserved.
           </footer>
           </div>
         </main>

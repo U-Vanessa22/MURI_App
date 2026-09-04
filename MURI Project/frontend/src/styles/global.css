@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
+  font-size: 87.5%;
+  scrollbar-gutter: stable;
   --muri-sky: #F2FCFF;
   --muri-mist: #BFEFFF;
   --muri-aqua: #79D4E6;
@@ -12,6 +14,35 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+/* Defer rendering for off-screen content cards without affecting navigation. */
+:where([class*='card'], [class$='card'], [class*='Card'], [class$='Card']) {
+  content-visibility: auto;
+  contain-intrinsic-size: 240px;
+}
+
+:where(.muri-topnav, .unified-sidebar, .muri-topnav *, .unified-sidebar *) {
+  content-visibility: visible;
+  contain-intrinsic-size: auto;
+}
+
+select {
+  min-height: 40px;
+  padding: 9px 32px 9px 11px;
+  border: 1px solid #b8c7d9;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #243447;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+select:focus {
+  outline: none;
+  border-color: #0C5494;
+  box-shadow: 0 0 0 3px rgba(12, 84, 148, 0.12);
 }
 
 body {

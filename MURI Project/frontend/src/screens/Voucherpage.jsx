@@ -9,11 +9,11 @@ import { documentAPI, voucherAPI } from '../services/api';
 
 const DRAFT_STORAGE_KEY = 'muri_voucher_draft';
 const STATUS_META = {
-  open: { label: 'Open', background: '#EDEDE7', color: '#1A1A1A' },
-  assigned: { label: 'Assigned', background: '#8FA6B8', color: '#1A1A1A' },
-  in_progress: { label: 'In Progress', background: '#D9A05B', color: '#1A1A1A' },
-  resolved: { label: 'Resolved', background: '#6E8F5C', color: '#FFFFFF' },
-  closed: { label: 'Closed', background: '#1E2A3A', color: '#FFFFFF' },
+  open: { label: 'Open' },
+  assigned: { label: 'Assigned' },
+  in_progress: { label: 'In Progress' },
+  resolved: { label: 'Resolved' },
+  closed: { label: 'Closed' },
 };
 
 const VoucherPage = () => {
@@ -87,7 +87,7 @@ const VoucherPage = () => {
   const currentUserId = Number(currentUser?.id || 0);
 
   const getStatusMeta = useCallback(
-    (status) => STATUS_META[status] || { label: status || 'Unknown', background: '#EDEDE7', color: '#1A1A1A' },
+    (status) => STATUS_META[status] || { label: status || 'Unknown' },
     []
   );
 
@@ -334,7 +334,7 @@ const VoucherPage = () => {
 
       {/* Main Content */}
       <main className="voucher-main">
-        <TopNavbar />
+        <TopNavbar title="Tickets" />
         <header className="voucher-header">
           <div>
             <h1>Ticket</h1>
@@ -539,46 +539,48 @@ const VoucherPage = () => {
               <div className="voucher-ticket-grid">
                 {displayedTickets.map((ticket) => (
                   <div key={ticket.id} className={`voucher-ticket-card ${hasTicketFilter ? 'voucher-ticket-card-focus' : ''}`}>
-                    <h4>{ticket.ticket_number} • {ticket.title}</h4>
-                    <p>{ticket.description}</p>
-                    <p>
-                      Priority: <strong>{ticket.priority}</strong> | Status:{' '}
-                      <span
-                        className="voucher-status-badge"
-                        style={{
-                          background: getStatusMeta(ticket.status).background,
-                          color: getStatusMeta(ticket.status).color,
-                        }}
-                      >
+                    <div className="voucher-ticket-card-header">
+                      <div>
+                        <span className="voucher-ticket-number">{ticket.ticket_number}</span>
+                        <h4>{ticket.title}</h4>
+                      </div>
+                      <span className={`voucher-status-badge voucher-status-${ticket.status || 'open'}`}>
                         {getStatusMeta(ticket.status).label}
                       </span>
-                    </p>
-                    <p><strong>Raised by:</strong> {ticket.requester_name || ticket.requester_email || 'Unknown staff member'}</p>
-                    <p><strong>Station:</strong> {ticket.requester_station || 'Not provided'}</p>
-                    <p><strong>Severity:</strong> {ticket.severity || ticket.priority || 'medium'}</p>
+                    </div>
+                    <p className="voucher-ticket-description">{ticket.description}</p>
+                    <div className="voucher-ticket-meta-grid">
+                      <p><span>Priority</span><strong>{ticket.priority}</strong></p>
+                      <p><span>Raised by</span><strong>{ticket.requester_name || ticket.requester_email || 'Unknown staff member'}</strong></p>
+                      <p><span>Station</span><strong>{ticket.requester_station || 'Not provided'}</strong></p>
+                      <p><span>Severity</span><strong>{ticket.severity || ticket.priority || 'medium'}</strong></p>
+                    </div>
                     {(ticket.preferred_date || ticket.preferred_time) && (
-                      <p>
-                        <strong>Preferred appointment:</strong>{' '}
-                        {[ticket.preferred_date, ticket.preferred_time].filter(Boolean).join(' ')}
-                      </p>
+                      <div className="voucher-ticket-appointment">
+                        <span>Preferred appointment</span>
+                        <strong>{[ticket.preferred_date, ticket.preferred_time].filter(Boolean).join(' ')}</strong>
+                      </div>
                     )}
 
                     {canManageTickets && (
-                      <div className="voucher-ticket-actions-row">
+                      <div className="voucher-ticket-actions-row voucher-ticket-card-footer">
                         {updatingTicketIds.has(ticket.id) ? (
                           <span className="voucher-ticket-updating">Updating status…</span>
                         ) : (
-                          <>
-                            <button className="voucher-ticket-action" type="button" onClick={() => handleStatusChange(ticket.id, 'in_progress')}>
-                              Mark Under Review
-                            </button>
-                            <button className="voucher-ticket-action" type="button" onClick={() => handleStatusChange(ticket.id, 'resolved')}>
-                              Mark Completed
-                            </button>
-                            <button className="voucher-ticket-action voucher-ticket-action-danger" type="button" onClick={() => handleStatusChange(ticket.id, 'closed')}>
-                              Archive
-                            </button>
-                          </>
+                          <label className="voucher-status-control">
+                            <span>Update status</span>
+                            <DropdownSelect
+                              value={ticket.status}
+                              onChange={(nextStatus) => handleStatusChange(ticket.id, nextStatus)}
+                              className="voucher-status-dropdown"
+                              options={[
+                                { value: 'open', label: 'Open' },
+                                { value: 'in_progress', label: 'In Progress' },
+                                { value: 'resolved', label: 'Resolved' },
+                                { value: 'closed', label: 'Closed' },
+                              ]}
+                            />
+                          </label>
                         )}
                       </div>
                     )}
@@ -622,18 +624,16 @@ const VoucherPage = () => {
 
                         <div className="voucher-ticket-inline">
                           <label className="voucher-ticket-label">Link Document:</label>
-                          <select
-                            className="voucher-ticket-select"
+                          <DropdownSelect
+                            className="voucher-status-dropdown"
                             value={documentLinkState[ticket.id] || ''}
-                            onChange={(e) => setDocumentLinkState((prev) => ({ ...prev, [ticket.id]: e.target.value }))}
-                          >
-                            <option value="">Select document</option>
-                            {documents.map((doc) => (
-                              <option key={doc.id} value={doc.id}>
-                                {doc.document_ref} - {doc.name_of_staff}
-                              </option>
-                            ))}
-                          </select>
+                            onChange={(value) => setDocumentLinkState((prev) => ({ ...prev, [ticket.id]: value }))}
+                            placeholder="Select document"
+                            options={documents.map((doc) => ({
+                              value: String(doc.id),
+                              label: `${doc.document_ref} - ${doc.name_of_staff}`,
+                            }))}
+                          />
                           <button className="voucher-ticket-action" type="button" onClick={() => handleLinkDocument(ticket.id)}>Link</button>
                         </div>
                       </div>
