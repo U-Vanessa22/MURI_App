@@ -98,13 +98,13 @@ const VoucherDashboard = () => {
 
         {/* Main Content */}
         <main className="simple-main">
-          <TopNavbar title="Dashboard" />
+          <TopNavbar title="Logistics" />
           <div className="simple-dashboard-content">
             {/* Welcome Section */}
             <section className="simple-welcome">
               <h1>Welcome back, {user.full_name || user.username || 'there'}!</h1>
               <div className="welcome-subtitle">
-                <p>Voucher overview — track which ICT assets are issued and which are available.</p>
+                <p>Logistics overview — track which ICT assets are issued and which are available.</p>
                 {user.department && user.station && (
                   <div className="user-context">
                     <span className="context-badge">{user.department}</span>
@@ -125,17 +125,17 @@ const VoucherDashboard = () => {
               <div className="simple-stats-grid">
                 <StatCard
                   value={stats.total}
-                  label="Total Vouchers"
+                  label="Total Logistics Records"
                   onClick={() => navigate('/asset-issuance')}
                 />
                 <StatCard
                   value={stats.currentlyIssued}
-                  label="Currently Issued"
+                  label="Assets Currently Issued"
                   onClick={() => navigate('/asset-issuance')}
                 />
                 <StatCard
                   value={stats.returned}
-                  label="Returned Vouchers"
+                  label="Assets Returned"
                   onClick={() => navigate('/asset-issuance')}
                 />
                 <StatCard
@@ -159,7 +159,7 @@ const VoucherDashboard = () => {
                     <FaExchangeAlt />
                   </div>
                   <h3>Issue / Return Asset</h3>
-                  <p>Record a new voucher or mark an issued asset as returned</p>
+                  <p>Record an asset issue or mark an issued asset as returned</p>
                 </div>
 
                 <div
@@ -204,7 +204,7 @@ const VoucherDashboard = () => {
             <section className="simple-activity-section">
               <h2 className="simple-section-title">Recent Issuance Activity</h2>
               <div className="simple-activity-list">
-                {recentActivity.length === 0 && <p>No voucher activity yet.</p>}
+                {recentActivity.length === 0 && <p>No logistics activity yet.</p>}
                 {recentActivity.map((item) => (
                   <div key={item.id} className="simple-activity-item">
                     <div className="simple-activity-text">
