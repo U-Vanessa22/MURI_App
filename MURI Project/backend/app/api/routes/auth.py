@@ -1,13 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from app.db.session import SessionLocal
 from app.models.user import User
-from app.core.security import verify_password, hash_password, create_access_token, decode_access_token
-from app.schemas.auth_schema import LoginRequest, RegisterRequest, AuthResponse, UserResponse
+from app.core.security import verify_password, hash_password, create_access_token
+from app.schemas.auth_schema import LoginRequest, RegisterRequest, AuthResponse, UserResponse, ChangePasswordRequest
+from app.api.deps import get_authenticated_user, get_db
 
 router = APIRouter()
-bearer_scheme = HTTPBearer()
 
 ORG_DOMAIN = "@icttoolsasm.com"
 
@@ -21,15 +19,8 @@ def to_user_response(user: User) -> UserResponse:
         full_name=user.full_name,
         department=user.department,
         station=user.station,
+        must_change_password=user.must_change_password,
     )
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 
 @router.post("/login")
 def login(payload: LoginRequest, db: Session = Depends(get_db)) -> AuthResponse:
@@ -54,8 +45,10 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)) -> AuthResponse:
     # Verify password
     if not verify_password(password, user.password):
         raise HTTPException(status_code=401, detail="Invalid password")
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="This account is inactive")
 
-    access_token = create_access_token(user.email)
+    access_token = create_access_token(user.email, temporary=user.must_change_password)
 
     return AuthResponse(
         access_token=access_token,
@@ -99,15 +92,26 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)) -> AuthRes
 
 @router.get("/me")
 def get_me(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
-    db: Session = Depends(get_db)
+    user: User = Depends(get_authenticated_user),
 ) -> UserResponse:
-    email = decode_access_token(credentials.credentials)
-    if not email:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
-
-    user = db.query(User).filter(User.email == email).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
     return to_user_response(user)
+
+
+@router.post("/change-password")
+def change_password(
+    payload: ChangePasswordRequest,
+    user: User = Depends(get_authenticated_user),
+    db: Session = Depends(get_db),
+) -> AuthResponse:
+    if not verify_password(payload.current_password, user.password):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    if payload.current_password == payload.new_password:
+        raise HTTPException(status_code=400, detail="Choose a password different from your temporary password")
+    if len(payload.new_password.encode('utf-8')) > 72:
+        raise HTTPException(status_code=400, detail="Password must be at most 72 bytes")
+    user.password = hash_password(payload.new_password)
+    user.must_change_password = False
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return AuthResponse(access_token=create_access_token(user.email), user=to_user_response(user))

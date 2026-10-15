@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from fastapi import HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import func
@@ -33,6 +33,7 @@ def get_db():
 @router.post("/create-user")
 def create_user(
     payload: AdminCreateUserRequest,
+    response: Response,
     db: Session = Depends(get_db),
     _: User = Depends(require_it_user),
 ):
@@ -43,6 +44,8 @@ def create_user(
     existing_user = db.query(User).filter(User.email == payload.email).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
+    if payload.username and db.query(User).filter(User.username == payload.username).first():
+        raise HTTPException(status_code=400, detail="Username already taken")
 
     temporary_password = generate_temporary_password()
 
@@ -54,11 +57,23 @@ def create_user(
         station=payload.station,
         password=hash_password(temporary_password),
         role=(payload.role or "USER").upper(),
+        must_change_password=True,
     )
 
     db.add(user)
     db.commit()
     db.refresh(user)
+
+    response.headers['Cache-Control'] = 'no-store'
+    response.headers['Pragma'] = 'no-cache'
+    if payload.delivery_method == 'manual':
+        return {
+            "message": "Account created. Send the login details to the user manually.",
+            "delivery_method": "manual",
+            "email": user.email,
+            "username": user.username,
+            "temporary_password": temporary_password,
+        }
 
     try:
         send_welcome_email(
@@ -228,6 +243,7 @@ def reset_user_password(
         raise HTTPException(status_code=404, detail="User not found")
 
     user.password = hash_password(payload.new_password)
+    user.must_change_password = True
     db.commit()
     return {"message": "Password reset successfully"}
 

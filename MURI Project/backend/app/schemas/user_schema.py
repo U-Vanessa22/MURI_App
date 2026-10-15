@@ -1,8 +1,10 @@
 from pydantic import BaseModel
+from typing import Literal
 
 
 class AdminCreateUserRequest(BaseModel):
 	email: str
+	delivery_method: Literal["email", "manual"] = "email"
 	role: str = "USER"
 	username: str | None = None
 	full_name: str | None = None

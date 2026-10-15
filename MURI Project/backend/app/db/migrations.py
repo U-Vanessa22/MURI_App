@@ -34,6 +34,7 @@ def run_startup_migrations(engine) -> None:
     existing_columns = {column["name"] for column in inspector.get_columns("users")}
 
     required_user_columns = {
+        "must_change_password": "ALTER TABLE users ADD COLUMN must_change_password BOOLEAN NOT NULL DEFAULT FALSE",
         "username": "ALTER TABLE users ADD COLUMN username VARCHAR",
         "full_name": "ALTER TABLE users ADD COLUMN full_name VARCHAR",
         "department": "ALTER TABLE users ADD COLUMN department VARCHAR",

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, false
 from datetime import datetime
 from app.db.session import Base
 
@@ -18,6 +18,7 @@ class User(Base):
     station = Column(String, nullable=True)
 
     password = Column(String)
+    must_change_password = Column(Boolean, nullable=False, default=False, server_default=false())
 
     role = Column(String, default="USER")
 

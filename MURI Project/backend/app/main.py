@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+from app.api.deps import require_password_change_completed
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.session import engine, Base, SessionLocal
 from app.db.migrations import run_startup_migrations, seed_lookup_tables
@@ -11,7 +12,8 @@ from fastapi import Response
 # STEP 1: Create FastAPI app FIRST
 app = FastAPI(
     title="ICT Tools ASM Backend",
-    version="1.0.0"
+    version="1.0.0",
+    dependencies=[Depends(require_password_change_completed)],
 )
 
 app.add_middleware(

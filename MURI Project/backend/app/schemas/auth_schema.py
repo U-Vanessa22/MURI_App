@@ -19,6 +19,7 @@ class RegisterRequest(BaseModel):
 class UserResponse(BaseModel):
 	id: int | None = None
 	email: str
+	must_change_password: bool = False
 	role: str
 	username: str | None = None
 	full_name: str | None = None
@@ -30,3 +31,8 @@ class AuthResponse(BaseModel):
 	access_token: str
 	token_type: str = "bearer"
 	user: UserResponse
+
+
+class ChangePasswordRequest(BaseModel):
+	current_password: str
+	new_password: str = Field(min_length=8, max_length=72)
