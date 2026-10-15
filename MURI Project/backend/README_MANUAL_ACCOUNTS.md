@@ -26,8 +26,10 @@ delivery still requires SMTP and rolls back account creation if sending fails.
 Organization email and IT/admin access requirements remain in force.
 
 Deploy this backend together with the updated `Leslyndizeye/murif` frontend.
-The frontend repository does not contain this backend. Render must deploy the
-backend from this repository's `MURI Project/backend` directory.
+The backend source is available in this repository's `MURI Project/backend`
+directory and as a copy under `backend` in `Leslyndizeye/murif`. Render must
+use the matching backend root directory for its connected repository.
+Netlify continues to build the frontend from the `murif` repository root.
 
 Run the isolated regression tests from the backend directory:
 
