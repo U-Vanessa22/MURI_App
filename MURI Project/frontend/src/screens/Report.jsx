@@ -202,7 +202,7 @@ export default function ReportPage() {
               <DropdownSelect
                 className="filter-select"
                 value={selectedPeriod}
-                onChange={setSelectedPeriod}
+                onChange={(e) => setSelectedPeriod(e.target.value)}
                 options={[
                   { value: 'today', label: 'Today' },
                   { value: 'week', label: 'This Week' },
@@ -217,7 +217,7 @@ export default function ReportPage() {
               <DropdownSelect
                 className="filter-select"
                 value={selectedCategory}
-                onChange={setSelectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
                 options={[
                   { value: 'all', label: 'All Statuses' },
                   { value: 'open', label: 'Open' },
